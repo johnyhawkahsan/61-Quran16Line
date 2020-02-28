@@ -1,0 +1,2 @@
+Place pdf file here. I am not going to upload it to github because of it's size. But pdf file needs to be here.
+Also note that this "assets" folder is inside "main" and not in "res". Otherwise, pdf won't be read and error will be thrown : "the file name must end with xml."
