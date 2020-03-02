@@ -1,5 +1,6 @@
 package com.johnyhawkdesigns.a61_quran16line;
 
+import android.app.ActionBar;
 import android.os.Bundle;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -31,7 +32,6 @@ public class NavigationDrawer extends AppCompatActivity {
 
     View decorView;
     boolean fullscreen;
-    boolean isStatusBarVisible;
 
 
     @Override
@@ -44,8 +44,10 @@ public class NavigationDrawer extends AppCompatActivity {
 
         decorView = getWindow().getDecorView(); // this view can be used to show or hide status bar
 
-        //fullscreen = true;
-        hideStatusBar(); // at start, we need to hide
+        // at start, we want the app to launch in fullscreen
+        hideStatusBar();
+        hideToolBar();
+        fullscreen = false;
 
         setupFab();
 
@@ -72,7 +74,6 @@ public class NavigationDrawer extends AppCompatActivity {
     }
 
 
-
     private void setupNavController(NavigationView navigationView) {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
@@ -93,39 +94,36 @@ public class NavigationDrawer extends AppCompatActivity {
                 || super.onSupportNavigateUp();
     }
 
-    public void toggleFullscreen() {
-        toggleStatusBar();
-        Log.d(TAG, "toggleFullscreen: ");
+
+    public void toggleFullscreen(){
+        Log.d(TAG, "toggleFullscreen: fullscreen = " + fullscreen);
+        if (!fullscreen){ // if status bar is not visible, show status bar
+            fullscreen = true;
+            showStatusBar();
+            showToolbar();
+        } else { // if status bar is visible, hide status bar
+            fullscreen = false;
+            hideStatusBar();
+            hideToolBar();
+        }
     }
 
     // Remember that you should never show the action bar if the status bar is hidden, so hide that too if necessary.
     // ActionBar actionBar = getActionBar(); actionBar.hide(); // NOTE: I'm hiding action bar using theme Theme.AppCompat.Light.NoActionBar"
     private void hideStatusBar() {
-        isStatusBarVisible = false;
         int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN; // Hide the status bar.
         decorView.setSystemUiVisibility(uiOptions);
-        hideToolBar();
     }
 
     private void showStatusBar() {
-        isStatusBarVisible = true;
         int uiOptions = View.SYSTEM_UI_FLAG_VISIBLE; // Hide the status bar.
         decorView.setSystemUiVisibility(uiOptions);
-        showToolbar();
     }
 
-    private void toggleStatusBar(){
-        Log.d(TAG, "toggleStatusBar: isStatusBarVisible = " + isStatusBarVisible);
-        if (!isStatusBarVisible){ // if status bar is not visible, show status bar
-            showStatusBar();
-        } else { // if status bar is visible, hide status bar
-            hideStatusBar();
-        }
-    }
 
     public void hideToolBar() {
         if (toolbar != null){
-            toolbar.setVisibility(View.GONE);
+            toolbar.setVisibility(View.GONE); // Note: View.Invisible only hides text.
         }
     }
 

@@ -91,7 +91,7 @@ public class MainActivity
     public boolean onTap(MotionEvent e) {
         Log.d(TAG, "onTap: pdfView.getCurrentPage() = " + pdfView.getCurrentPage());
         Log.d(TAG, "onTap: pdfView.getPageCount() = " + pdfView.getPageCount());
-        //toggleStatusBar();
+        //toggleFullscreen();
         toggleGotoButton();
         return true;
     }
