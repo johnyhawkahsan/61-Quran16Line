@@ -1,4 +1,4 @@
-package com.johnyhawkdesigns.a61_quran16line.ui.gallery;
+package com.johnyhawkdesigns.a61_quran16line.ui.index;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;

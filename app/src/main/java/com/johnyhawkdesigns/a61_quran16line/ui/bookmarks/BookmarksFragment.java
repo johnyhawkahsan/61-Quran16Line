@@ -1,4 +1,4 @@
-package com.johnyhawkdesigns.a61_quran16line.ui.slideshow;
+package com.johnyhawkdesigns.a61_quran16line.ui.bookmarks;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -22,7 +22,7 @@ public class BookmarksFragment extends Fragment {
                              ViewGroup container, Bundle savedInstanceState) {
         bookmarksViewModel =
                 ViewModelProviders.of(this).get(BookmarksViewModel.class);
-        View root = inflater.inflate(R.layout.fragment_slideshow, container, false);
+        View root = inflater.inflate(R.layout.fragment_bookmarks, container, false);
         final TextView textView = root.findViewById(R.id.text_slideshow);
         bookmarksViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
             @Override

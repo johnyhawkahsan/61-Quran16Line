@@ -1,4 +1,4 @@
-package com.johnyhawkdesigns.a61_quran16line.ui.share;
+package com.johnyhawkdesigns.a61_quran16line.ui.index;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -14,17 +14,17 @@ import androidx.lifecycle.ViewModelProviders;
 
 import com.johnyhawkdesigns.a61_quran16line.R;
 
-public class ShareFragment extends Fragment {
+public class IndexFragment extends Fragment {
 
-    private ShareViewModel shareViewModel;
+    private IndexViewModel galleryViewModel;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        shareViewModel =
-                ViewModelProviders.of(this).get(ShareViewModel.class);
-        View root = inflater.inflate(R.layout.fragment_share, container, false);
-        final TextView textView = root.findViewById(R.id.text_share);
-        shareViewModel.getText().observe(this, new Observer<String>() {
+        galleryViewModel =
+                ViewModelProviders.of(this).get(IndexViewModel.class);
+        View root = inflater.inflate(R.layout.fragment_index, container, false);
+        final TextView textView = root.findViewById(R.id.text_gallery);
+        galleryViewModel.getText().observe(this, new Observer<String>() {
             @Override
             public void onChanged(@Nullable String s) {
                 textView.setText(s);

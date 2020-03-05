@@ -22,14 +22,15 @@ import androidx.appcompat.widget.Toolbar;
 
 import android.view.Menu;
 
-public class NavigationDrawer extends AppCompatActivity {
+public class NavigationDrawer
+        extends AppCompatActivity {
 
     private static final String TAG = NavigationDrawer.class.getSimpleName();
 
     private AppBarConfiguration mAppBarConfiguration;
     Toolbar toolbar;
-
     View decorView;
+    FloatingActionButton fab;
     boolean fullscreen;
     boolean isStatusBarVisible;
 
@@ -44,9 +45,6 @@ public class NavigationDrawer extends AppCompatActivity {
 
         decorView = getWindow().getDecorView(); // this view can be used to show or hide status bar
 
-        //fullscreen = true;
-        hideStatusBar(); // at start, we need to hide
-
         setupFab();
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
@@ -57,15 +55,18 @@ public class NavigationDrawer extends AppCompatActivity {
                 .build();
 
         setupNavController(navigationView);
+
+        //fullscreen = true;
+        hideStatusBar(); // at start, we need to hide
     }
 
 
     public void setupFab(){
-        FloatingActionButton fab = findViewById(R.id.fab);
+        fab = findViewById(R.id.fabBookmark);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                Snackbar.make(view, "Bookmark Saved", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
             }
         });
@@ -105,6 +106,7 @@ public class NavigationDrawer extends AppCompatActivity {
         int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN; // Hide the status bar.
         decorView.setSystemUiVisibility(uiOptions);
         hideToolBar();
+        fab.hide();
     }
 
     private void showStatusBar() {
@@ -112,6 +114,7 @@ public class NavigationDrawer extends AppCompatActivity {
         int uiOptions = View.SYSTEM_UI_FLAG_VISIBLE; // Hide the status bar.
         decorView.setSystemUiVisibility(uiOptions);
         showToolbar();
+        fab.show();
     }
 
     private void toggleStatusBar(){

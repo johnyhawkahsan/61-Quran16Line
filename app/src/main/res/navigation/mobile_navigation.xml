@@ -13,21 +13,21 @@
 
     <fragment
         android:id="@+id/nav_gallery"
-        android:name="com.johnyhawkdesigns.a61_quran16line.ui.gallery.IndexFragment"
+        android:name="com.johnyhawkdesigns.a61_quran16line.ui.index.IndexFragment"
         android:label="@string/menu_index"
-        tools:layout="@layout/fragment_gallery" />
+        tools:layout="@layout/fragment_index" />
 
     <fragment
         android:id="@+id/nav_slideshow"
-        android:name="com.johnyhawkdesigns.a61_quran16line.ui.slideshow.BookmarksFragment"
+        android:name="com.johnyhawkdesigns.a61_quran16line.ui.bookmarks.BookmarksFragment"
         android:label="@string/menu_bookmarks"
-        tools:layout="@layout/fragment_slideshow" />
+        tools:layout="@layout/fragment_bookmarks" />
 
 
     <fragment
         android:id="@+id/nav_share"
-        android:name="com.johnyhawkdesigns.a61_quran16line.ui.share.ShareFragment"
+        android:name="com.johnyhawkdesigns.a61_quran16line.ui.about.AboutFragment"
         android:label="@string/menu_about"
-        tools:layout="@layout/fragment_share" />
+        tools:layout="@layout/fragment_about" />
 
 </navigation>

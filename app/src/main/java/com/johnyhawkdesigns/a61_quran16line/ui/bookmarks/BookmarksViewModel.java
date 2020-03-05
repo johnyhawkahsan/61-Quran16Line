@@ -1,16 +1,16 @@
-package com.johnyhawkdesigns.a61_quran16line.ui.share;
+package com.johnyhawkdesigns.a61_quran16line.ui.bookmarks;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-public class ShareViewModel extends ViewModel {
+public class BookmarksViewModel extends ViewModel {
 
     private MutableLiveData<String> mText;
 
-    public ShareViewModel() {
+    public BookmarksViewModel() {
         mText = new MutableLiveData<>();
-        mText.setValue("This is share fragment");
+        mText.setValue("This is slideshow fragment");
     }
 
     public LiveData<String> getText() {
