@@ -1,4 +1,4 @@
-package com.johnyhawkdesigns.a61_quran16line.ui;
+package com.johnyhawkdesigns.a61_quran16line.ui.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;

@@ -6,14 +6,20 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.core.view.GravityCompat;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
 import com.google.android.material.navigation.NavigationView;
+import com.johnyhawkdesigns.a61_quran16line.ui.utils.ExpandableListAdapter;
+import com.johnyhawkdesigns.a61_quran16line.ui.utils.MenuModel;
 
 import androidx.drawerlayout.widget.DrawerLayout;
 
@@ -21,9 +27,16 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import android.view.Menu;
+import android.widget.ExpandableListView;
+import android.widget.Toast;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 public class NavigationDrawer
-        extends AppCompatActivity {
+        extends AppCompatActivity
+        implements NavigationView.OnNavigationItemSelectedListener{
 
     private static final String TAG = NavigationDrawer.class.getSimpleName();
 
@@ -33,6 +46,15 @@ public class NavigationDrawer
     FloatingActionButton fab;
     boolean fullscreen;
     boolean isStatusBarVisible;
+
+    DrawerLayout drawer;
+
+
+    // TODO: Related to ExpandableListView
+    ExpandableListAdapter expandableListAdapter;
+    ExpandableListView expandableListView;
+    List<MenuModel> headerList = new ArrayList<>();
+    HashMap<MenuModel, List<MenuModel>> childList = new HashMap<>();
 
 
     @Override
@@ -47,7 +69,7 @@ public class NavigationDrawer
 
         setupFab();
 
-        DrawerLayout drawer = findViewById(R.id.drawer_layout);
+        drawer = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
         mAppBarConfiguration = new AppBarConfiguration.Builder( // Passing each menu ID as a set of Ids because each menu should be considered as top level destinations.
                 R.id.nav_home, R.id.nav_gallery, R.id.nav_slideshow)
@@ -58,6 +80,17 @@ public class NavigationDrawer
 
         //fullscreen = true;
         hideStatusBar(); // at start, we need to hide
+
+
+        // TODO: Related to ExpandableListView
+        expandableListView = findViewById(R.id.expandableListView);
+        navigationView.setNavigationItemSelectedListener(this);
+        prepareMenuData();
+        populateExpandableList();
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.addDrawerListener(toggle);
+        toggle.syncState();
     }
 
 
@@ -136,5 +169,88 @@ public class NavigationDrawer
         if (toolbar != null){
             toolbar.setVisibility(View.VISIBLE);
         }
+    }
+
+    @SuppressWarnings("StatementWithEmptyBody")
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item) {
+        // Handle navigation view item clicks here.
+        int id = item.getItemId();
+
+        if (id == R.id.nav_home) {
+            // Handle the camera action
+        } else if (id == R.id.nav_gallery) {
+
+        } else if (id == R.id.nav_slideshow) {
+
+        }
+
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
+    }
+
+    private void prepareMenuData() {
+
+        MenuModel menuModel = new MenuModel("Android WebView Tutorial", true, false, 5); //Menu of Android Tutorial. No sub menus
+        headerList.add(menuModel);
+
+        if (!menuModel.hasChildren) {
+            childList.put(menuModel, null);
+        }
+
+        menuModel = new MenuModel("Java Tutorials", true, true, 3); //Menu of Java Tutorials
+        headerList.add(menuModel);
+
+        List<MenuModel> childModelsList = new ArrayList<>();
+        MenuModel childModel = new MenuModel("Core Java Tutorial", false, false, 4);
+        childModelsList.add(childModel);
+
+        childModel = new MenuModel("Java FileInputStream", false, false, 5);
+        childModelsList.add(childModel);
+
+
+
+        if (menuModel.hasChildren) {
+            Log.d("API123","here");
+            childList.put(menuModel, childModelsList);
+        }
+
+    }
+
+    private void populateExpandableList() {
+
+        expandableListAdapter = new ExpandableListAdapter(this, headerList, childList);
+        expandableListView.setAdapter(expandableListAdapter);
+
+        expandableListView.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
+            @Override
+            public boolean onGroupClick(ExpandableListView parent, View v, int groupPosition, long id) {
+
+                if (headerList.get(groupPosition).isGroup) {
+                    if (!headerList.get(groupPosition).hasChildren) {
+                        Toast.makeText(NavigationDrawer.this, "Clicked TITLE", Toast.LENGTH_SHORT).show();
+                        // onBackPressed(); // This closes the app if the item is clicked
+                    }
+                }
+
+                return false;
+            }
+        });
+
+        expandableListView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
+            @Override
+            public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
+
+                if (childList.get(headerList.get(groupPosition)) != null) {
+                    MenuModel model = childList.get(headerList.get(groupPosition)).get(childPosition);
+                    if (model.pageNo > 0) {
+                        Toast.makeText(NavigationDrawer.this, "Clicked CHILD", Toast.LENGTH_SHORT).show();
+                        // onBackPressed(); // This closes the app if the item is clicked
+                    }
+                }
+
+                return false;
+            }
+        });
     }
 }
