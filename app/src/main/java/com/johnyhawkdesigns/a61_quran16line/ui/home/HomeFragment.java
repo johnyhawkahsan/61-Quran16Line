@@ -12,6 +12,7 @@ import android.widget.TextView;
 import androidx.annotation.Nullable;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 
 
 import com.github.barteksc.pdfviewer.PDFView;
@@ -22,6 +23,7 @@ import com.github.barteksc.pdfviewer.scroll.DefaultScrollHandle;
 import com.github.barteksc.pdfviewer.util.FitPolicy;
 import com.johnyhawkdesigns.a61_quran16line.NavigationDrawer;
 import com.johnyhawkdesigns.a61_quran16line.R;
+import com.johnyhawkdesigns.a61_quran16line.ui.dialog.GotoDialogFragment;
 
 public class HomeFragment
         extends Fragment
@@ -102,7 +104,23 @@ public class HomeFragment
     @Override
     public void onClick(View v) {
         Log.d(TAG, "onClick: ");
+
         //pdfView.jumpTo(pdfView.getPageCount() / 2); // go to specific page
+
+
+        GotoDialogFragment dialogFragment = GotoDialogFragment.newInstance();
+//        FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
+//        ft.replace(R.id.nav_host_fragment, dialogFragment);
+//        ft.addToBackStack(null);
+        dialogFragment.show(getActivity().getSupportFragmentManager(), "dialog");
+        dialogFragment.setDialogListener(new GotoDialogFragment.DialogListener() {
+            @Override
+            public void onEnterPageNo(int pageNo) {
+                Log.d(TAG, "onEnterPageNo: pageNo = " + pageNo);
+                pdfView.jumpTo(pageNo); // go to specific page
+            }
+        });
+
     }
 
 }
