@@ -4,6 +4,7 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    style="@style/Theme.MaterialComponents.Light.Dialog"
     android:padding="10dp">
 
     <TextView
@@ -11,7 +12,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
-        android:text="Enter Page No" />
+        android:text="Page No" />
 
 
     <EditText
@@ -24,13 +25,18 @@
 
     <Button
         android:id="@+id/btnGo"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        style="@style/Widget.AppCompat.Button.Borderless"
         android:text="Done" />
 
     <Button
         android:id="@+id/btnCancel"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        style="@style/Widget.AppCompat.Button.Borderless"
         android:text="Cancel" />
+
 </LinearLayout>

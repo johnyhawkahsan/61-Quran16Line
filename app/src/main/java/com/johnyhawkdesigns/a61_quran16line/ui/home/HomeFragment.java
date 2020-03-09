@@ -1,6 +1,7 @@
 package com.johnyhawkdesigns.a61_quran16line.ui.home;
 
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -32,7 +33,7 @@ public class HomeFragment
     private static final String TAG = HomeFragment.class.getSimpleName();
     private static final String PDF_FILE = "quran.pdf";
 
-    PDFView pdfView;
+    public PDFView pdfView;
 
     static int totalNoOfPages;
     Button gotoButton;
@@ -113,6 +114,12 @@ public class HomeFragment
 //        ft.replace(R.id.nav_host_fragment, dialogFragment);
 //        ft.addToBackStack(null);
         dialogFragment.show(getActivity().getSupportFragmentManager(), "dialog");
+
+        DisplayMetrics metrics = getResources().getDisplayMetrics();
+        int width = metrics.widthPixels;
+        int height = metrics.heightPixels;
+
+
         dialogFragment.setDialogListener(new GotoDialogFragment.DialogListener() {
             @Override
             public void onEnterPageNo(int pageNo) {

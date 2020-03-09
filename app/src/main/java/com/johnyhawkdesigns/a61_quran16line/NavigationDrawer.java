@@ -6,10 +6,10 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
 import android.util.Log;
+import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.core.view.GravityCompat;
 import androidx.navigation.NavController;
@@ -17,7 +17,9 @@ import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
+
 import com.google.android.material.navigation.NavigationView;
+import com.johnyhawkdesigns.a61_quran16line.ui.home.HomeFragment;
 import com.johnyhawkdesigns.a61_quran16line.ui.utils.ExpandableListAdapter;
 import com.johnyhawkdesigns.a61_quran16line.ui.utils.MenuModel;
 
@@ -47,14 +49,16 @@ public class NavigationDrawer
     boolean fullscreen;
     boolean isStatusBarVisible;
 
+    NavController navController;
+
     DrawerLayout drawer;
 
 
     // TODO: Related to ExpandableListView
     ExpandableListAdapter expandableListAdapter;
     ExpandableListView expandableListView;
-    List<MenuModel> headerList = new ArrayList<>();
-    HashMap<MenuModel, List<MenuModel>> childList = new HashMap<>();
+    List<MenuModel> headerList = new ArrayList<>(); // Holds headers of the Navigation Drawers
+    HashMap<MenuModel, List<MenuModel>> childList = new HashMap<>(); // Holds children of the Navigation Drawers
 
 
     @Override
@@ -108,7 +112,7 @@ public class NavigationDrawer
 
 
     private void setupNavController(NavigationView navigationView) {
-        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
+        navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
     }
@@ -120,6 +124,7 @@ public class NavigationDrawer
         return true;
     }
 
+    // To ensure the Back button works properly, you also need to override the onSupportNavigateUp() method
     @Override
     public boolean onSupportNavigateUp() {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
@@ -171,14 +176,17 @@ public class NavigationDrawer
         }
     }
 
+    // inside activity_navigation_drawer.xml, we have to use property of "NavigationView" as app:menu="@menu/activity_navigation_drawer_drawer"
+    // Right now, this doesn't serve any purpose.
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
+        Log.d(TAG, "onNavigationItemSelected: id = " + id);
 
         if (id == R.id.nav_home) {
-            // Handle the camera action
+
         } else if (id == R.id.nav_gallery) {
 
         } else if (id == R.id.nav_slideshow) {
@@ -191,29 +199,32 @@ public class NavigationDrawer
 
     private void prepareMenuData() {
 
-        MenuModel menuModel = new MenuModel("Android WebView Tutorial", true, false, 5); //Menu of Android Tutorial. No sub menus
+        MenuModel menuModel = new MenuModel("Home", true, false, 1); //Menu of Android Tutorial. No sub menus
         headerList.add(menuModel);
 
         if (!menuModel.hasChildren) {
-            childList.put(menuModel, null);
+            childList.put(menuModel, null); // null means it doesn't have children
         }
 
-        menuModel = new MenuModel("Java Tutorials", true, true, 3); //Menu of Java Tutorials
+
+        menuModel = new MenuModel("Index", true, true, 1); //Menu of Java Tutorials
         headerList.add(menuModel);
 
         List<MenuModel> childModelsList = new ArrayList<>();
-        MenuModel childModel = new MenuModel("Core Java Tutorial", false, false, 4);
+        MenuModel childModel = new MenuModel("Parah - 1", false, false, 1);
         childModelsList.add(childModel);
 
-        childModel = new MenuModel("Java FileInputStream", false, false, 5);
+        childModel = new MenuModel("Parah - 2", false, false, 2);
         childModelsList.add(childModel);
-
 
 
         if (menuModel.hasChildren) {
-            Log.d("API123","here");
+            Log.d(TAG, "prepareMenuData: ");
             childList.put(menuModel, childModelsList);
         }
+
+        menuModel = new MenuModel("Bookmarks", true, true, 1); //Menu of Java Tutorials
+        headerList.add(menuModel);
 
     }
 
@@ -227,9 +238,18 @@ public class NavigationDrawer
             public boolean onGroupClick(ExpandableListView parent, View v, int groupPosition, long id) {
 
                 if (headerList.get(groupPosition).isGroup) {
-                    if (!headerList.get(groupPosition).hasChildren) {
-                        Toast.makeText(NavigationDrawer.this, "Clicked TITLE", Toast.LENGTH_SHORT).show();
+
+                    if (!headerList.get(groupPosition).hasChildren) { // if header list does not have children
+                        Toast.makeText(NavigationDrawer.this, "Clicked HOME", Toast.LENGTH_SHORT).show();
                         // onBackPressed(); // This closes the app if the item is clicked
+
+                        // if we are currently on some other fragment, we need to launch navigate method, otherwise, we only need to close drawer
+                        if (navController.getCurrentDestination().getId() != R.id.nav_home){
+                            navController.navigate(R.id.nav_home); // navigate to Home fragment
+                            drawer.closeDrawer(Gravity.LEFT);
+                            Log.d(TAG, "navController.getCurrentDestination().getId() = " + navController.getCurrentDestination().getId());
+                        }
+                        drawer.closeDrawer(Gravity.LEFT);
                     }
                 }
 
@@ -243,10 +263,17 @@ public class NavigationDrawer
 
                 if (childList.get(headerList.get(groupPosition)) != null) {
                     MenuModel model = childList.get(headerList.get(groupPosition)).get(childPosition);
-                    if (model.pageNo > 0) {
-                        Toast.makeText(NavigationDrawer.this, "Clicked CHILD", Toast.LENGTH_SHORT).show();
-                        // onBackPressed(); // This closes the app if the item is clicked
+
+                    Log.d(TAG, "onChildClick: model.parahNo = " + model.parahNo);
+                    switch (model.parahNo){
+                        case 1:
+                            // need to redirect to parah -1
+                            Toast.makeText(NavigationDrawer.this, "Redirect to Parah - 1", Toast.LENGTH_SHORT).show();
+
+                    default:
+                        return true;
                     }
+
                 }
 
                 return false;

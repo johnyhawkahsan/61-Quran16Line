@@ -15,7 +15,27 @@
         <item
             android:id="@+id/nav_slideshow"
             android:icon="@drawable/ic_menu_slideshow"
-            android:title="@string/menu_bookmarks" />
+            android:title="@string/menu_bookmarks" >
+
+            <menu>
+                <group android:checkableBehavior="single">
+
+                    <item
+                        android:id="@+id/challengeZone"
+                        android:checked="false"
+                        android:icon="@drawable/ic_menu_share"
+                        android:title="Home Work" />
+
+                    <item
+                        android:id="@+id/interviewSchedule"
+                        android:checked="false"
+                        android:icon="@drawable/ic_menu_send"
+                        android:title="Interview Schedule" />
+
+                </group>>
+
+            </menu>
+        </item>
 
     </group>
 
