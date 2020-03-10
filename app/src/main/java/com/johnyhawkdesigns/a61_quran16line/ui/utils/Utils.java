@@ -12,7 +12,12 @@ import static android.content.Context.MODE_PRIVATE;
 public class Utils {
 
 
-    private static final String BOOKMARKS_PREFERENCES = null;
+    public static final String BOOKMARKS_PREFERENCES = null;
+
+    public static final String MenuName_Home = "Home";
+    public static final String MenuName_Index = "Index";
+    public static final String MenuName_Bookmarks = "Bookmarks";
+    public static final String MenuName_About = "About";
 
     public void saveBookmark(PDFView pdfView, Context context){
         int bookmarkedPage = pdfView.getCurrentPage();

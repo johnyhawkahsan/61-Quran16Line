@@ -2,6 +2,7 @@ package com.johnyhawkdesigns.a61_quran16line;
 
 import android.os.Bundle;
 
+import com.github.barteksc.pdfviewer.util.Util;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -22,6 +23,7 @@ import com.google.android.material.navigation.NavigationView;
 import com.johnyhawkdesigns.a61_quran16line.ui.home.HomeFragment;
 import com.johnyhawkdesigns.a61_quran16line.ui.utils.ExpandableListAdapter;
 import com.johnyhawkdesigns.a61_quran16line.ui.utils.MenuModel;
+import com.johnyhawkdesigns.a61_quran16line.ui.utils.Utils;
 
 import androidx.drawerlayout.widget.DrawerLayout;
 
@@ -38,7 +40,7 @@ import java.util.List;
 
 public class NavigationDrawer
         extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener{
+        implements NavigationView.OnNavigationItemSelectedListener {
 
     private static final String TAG = NavigationDrawer.class.getSimpleName();
 
@@ -98,7 +100,7 @@ public class NavigationDrawer
     }
 
 
-    public void setupFab(){
+    public void setupFab() {
         fab = findViewById(R.id.fabBookmark);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -108,7 +110,6 @@ public class NavigationDrawer
             }
         });
     }
-
 
 
     private void setupNavController(NavigationView navigationView) {
@@ -155,9 +156,9 @@ public class NavigationDrawer
         fab.show();
     }
 
-    private void toggleStatusBar(){
+    private void toggleStatusBar() {
         Log.d(TAG, "toggleStatusBar: isStatusBarVisible = " + isStatusBarVisible);
-        if (!isStatusBarVisible){ // if status bar is not visible, show status bar
+        if (!isStatusBarVisible) { // if status bar is not visible, show status bar
             showStatusBar();
         } else { // if status bar is visible, hide status bar
             hideStatusBar();
@@ -165,13 +166,13 @@ public class NavigationDrawer
     }
 
     public void hideToolBar() {
-        if (toolbar != null){
+        if (toolbar != null) {
             toolbar.setVisibility(View.GONE);
         }
     }
 
     public void showToolbar() {
-        if (toolbar != null){
+        if (toolbar != null) {
             toolbar.setVisibility(View.VISIBLE);
         }
     }
@@ -199,7 +200,7 @@ public class NavigationDrawer
 
     private void prepareMenuData() {
 
-        MenuModel menuModel = new MenuModel("Home", true, false, 1); //Menu of Android Tutorial. No sub menus
+        MenuModel menuModel = new MenuModel(Utils.MenuName_Home, true, false, 1); //Menu of Android Tutorial. No sub menus
         headerList.add(menuModel);
 
         if (!menuModel.hasChildren) {
@@ -207,14 +208,14 @@ public class NavigationDrawer
         }
 
 
-        menuModel = new MenuModel("Index", true, true, 1); //Menu of Java Tutorials
+        menuModel = new MenuModel(Utils.MenuName_Index, true, true, 1);
         headerList.add(menuModel);
 
         List<MenuModel> childModelsList = new ArrayList<>();
-        MenuModel childModel = new MenuModel("Parah - 1", false, false, 1);
+        MenuModel childModel = new MenuModel("Parah-1", false, false, 1);
         childModelsList.add(childModel);
 
-        childModel = new MenuModel("Parah - 2", false, false, 2);
+        childModel = new MenuModel("Parah-2", false, false, 2);
         childModelsList.add(childModel);
 
 
@@ -223,7 +224,10 @@ public class NavigationDrawer
             childList.put(menuModel, childModelsList);
         }
 
-        menuModel = new MenuModel("Bookmarks", true, true, 1); //Menu of Java Tutorials
+        menuModel = new MenuModel(Utils.MenuName_Bookmarks, true, true, 0);
+        headerList.add(menuModel);
+
+        menuModel = new MenuModel(Utils.MenuName_About, true, false, 0);
         headerList.add(menuModel);
 
     }
@@ -237,22 +241,35 @@ public class NavigationDrawer
             @Override
             public boolean onGroupClick(ExpandableListView parent, View v, int groupPosition, long id) {
 
-                if (headerList.get(groupPosition).isGroup) {
+                if (headerList.get(groupPosition).isGroup) { // checking for isGroup excludes all children
 
-                    if (!headerList.get(groupPosition).hasChildren) { // if header list does not have children
-                        Toast.makeText(NavigationDrawer.this, "Clicked HOME", Toast.LENGTH_SHORT).show();
-                        // onBackPressed(); // This closes the app if the item is clicked
-
-                        // if we are currently on some other fragment, we need to launch navigate method, otherwise, we only need to close drawer
-                        if (navController.getCurrentDestination().getId() != R.id.nav_home){
-                            navController.navigate(R.id.nav_home); // navigate to Home fragment
+                    switch (groupPosition) {
+                        case 0: // Home
+                            // if current fragment is not nav_home, we need to launch navigate method, otherwise, we only need to close drawer
+                            if (navController.getCurrentDestination().getId() != R.id.nav_home) {
+                                navController.navigate(R.id.nav_home); // navigate to Home fragment
+                            }
                             drawer.closeDrawer(Gravity.LEFT);
-                            Log.d(TAG, "navController.getCurrentDestination().getId() = " + navController.getCurrentDestination().getId());
-                        }
-                        drawer.closeDrawer(Gravity.LEFT);
+                            break;
+
+                        case 1: // Index
+                            Log.d(TAG, "onGroupClick: Index");
+                            break;
+
+                        case 2: // Bookmarks
+                            Log.d(TAG, "onGroupClick: Bookmarks");
+                            break;
+
+                        case 3: // About
+                            // if we are currently on some other fragment, we need to launch navigate method, otherwise, we only need to close drawer
+                            navController.navigate(R.id.nav_about); // navigate to this fragment
+                            drawer.closeDrawer(Gravity.LEFT);
+                            break;
+
+                        default:
+                            break;
                     }
                 }
-
                 return false;
             }
         });
@@ -265,17 +282,21 @@ public class NavigationDrawer
                     MenuModel model = childList.get(headerList.get(groupPosition)).get(childPosition);
 
                     Log.d(TAG, "onChildClick: model.parahNo = " + model.parahNo);
-                    switch (model.parahNo){
+                    switch (model.parahNo) {
                         case 1:
                             // need to redirect to parah -1
-                            Toast.makeText(NavigationDrawer.this, "Redirect to Parah - 1", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(NavigationDrawer.this, "Redirecting to Parah - " + model.parahNo, Toast.LENGTH_SHORT).show();
+                            break;
 
-                    default:
-                        return true;
+                        case 2:
+                            // need to redirect to parah -1
+                            Toast.makeText(NavigationDrawer.this, "Redirecting to Parah - " + model.parahNo, Toast.LENGTH_SHORT).show();
+                            break;
+
+                        default:
+                            break;
                     }
-
                 }
-
                 return false;
             }
         });
