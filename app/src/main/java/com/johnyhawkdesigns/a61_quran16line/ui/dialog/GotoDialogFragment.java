@@ -27,15 +27,14 @@ public class GotoDialogFragment extends DialogFragment {
 
     private static final String TAG = GotoDialogFragment.class.getSimpleName();
 
-    public static GotoDialogFragment newInstance() {
+    public static GotoDialogFragment newInstance(int totalNoOfPages) {
         GotoDialogFragment gotoDialogFragment = new GotoDialogFragment();
 
-
-/*        // Supply num input as an argument.
+       // Supply num input as an argument.
         Bundle args = new Bundle();
-        args.putInt("num", num);
-        f.setArguments(args);
-*/
+        args.putInt("totalNoOfPages", totalNoOfPages);
+        gotoDialogFragment.setArguments(args);
+
         return gotoDialogFragment;
     }
 
@@ -54,7 +53,17 @@ public class GotoDialogFragment extends DialogFragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        int totalNoOfPages = 0;
+        try {
+            totalNoOfPages = getArguments().getInt("totalNoOfPages");
+        } catch (Exception e){
+            Log.e(TAG, "onViewCreated: ", e);
+        }
+
         final EditText editText = view.findViewById(R.id.editTextPageNo);
+        editText.setHint("Enter page from 1 to " + totalNoOfPages);
+
+
 
         Button btnDone = view.findViewById(R.id.btnGo);
         btnDone.setOnClickListener(new View.OnClickListener() {

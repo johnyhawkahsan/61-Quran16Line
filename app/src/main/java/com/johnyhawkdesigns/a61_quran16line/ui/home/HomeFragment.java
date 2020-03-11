@@ -1,7 +1,6 @@
 package com.johnyhawkdesigns.a61_quran16line.ui.home;
 
 import android.os.Bundle;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -10,7 +9,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
-import androidx.annotation.Nullable;
+
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
@@ -25,6 +24,9 @@ import com.github.barteksc.pdfviewer.util.FitPolicy;
 import com.johnyhawkdesigns.a61_quran16line.NavigationDrawer;
 import com.johnyhawkdesigns.a61_quran16line.R;
 import com.johnyhawkdesigns.a61_quran16line.ui.dialog.GotoDialogFragment;
+import com.shockwave.pdfium.PdfDocument;
+
+import java.util.List;
 
 public class HomeFragment
         extends Fragment
@@ -42,7 +44,6 @@ public class HomeFragment
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_home, container, false);
 
-
         // Showing pdf file
         pdfView = view.findViewById(R.id.pdfViewQuran);
         pdfView.fromAsset(PDF_FILE)
@@ -54,7 +55,7 @@ public class HomeFragment
                 .pageFitPolicy(FitPolicy.BOTH)
                 .load();
 
-        pdfView.getTableOfContents();
+        
 
         gotoButton = view.findViewById(R.id.gotoButton);
         gotoButton.setOnClickListener(this);
@@ -88,12 +89,28 @@ public class HomeFragment
     @Override
     public void loadComplete(int nbPages) {
         totalNoOfPages = pdfView.getPageCount();
-        //totalNoOfPages = nbPages; // same as pdfView.getPageCount()
-
+        // totalNoOfPages = nbPages; // same as pdfView.getPageCount()
+        // gotoButton.setText(String.valueOf( pdfView.getCurrentPage()  + "/" + totalNoOfPages)); // not used here because now I'm setting text in onPageChanged
         Log.d(TAG, "loadComplete: totalNoOfPages = " + totalNoOfPages);
 
-        // gotoButton.setText(String.valueOf( pdfView.getCurrentPage()  + "/" + totalNoOfPages)); // not used here because now I'm setting text in onPageChanged
+        PdfDocument.Meta meta = pdfView.getDocumentMeta();
+        Log.d(TAG, "title = " + meta.getTitle());
 
+        printBookmarksTree(pdfView.getTableOfContents());
+    }
+
+    public void printBookmarksTree(List<PdfDocument.Bookmark> tree) {
+
+        for (PdfDocument.Bookmark bookmark : tree) {
+
+            Log.d(TAG, "printBookmarksTree: bookmark.getTitle = " + bookmark.getTitle());
+            Log.d(TAG, "printBookmarksTree: bookmark.getPageIdx = " + bookmark.getPageIdx());
+
+            // if bookmark has children, then we can also put this inside method and retrieve children
+            if (bookmark.hasChildren()) {
+                printBookmarksTree(bookmark.getChildren());
+            }
+        }
     }
 
     @Override
@@ -104,21 +121,12 @@ public class HomeFragment
 
     @Override
     public void onClick(View v) {
-        Log.d(TAG, "onClick: ");
 
-        //pdfView.jumpTo(pdfView.getPageCount() / 2); // go to specific page
-
-
-        GotoDialogFragment dialogFragment = GotoDialogFragment.newInstance();
+        GotoDialogFragment dialogFragment = GotoDialogFragment.newInstance(totalNoOfPages); // no of pages are used as bundle arguments
 //        FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
 //        ft.replace(R.id.nav_host_fragment, dialogFragment);
 //        ft.addToBackStack(null);
         dialogFragment.show(getActivity().getSupportFragmentManager(), "dialog");
-
-        DisplayMetrics metrics = getResources().getDisplayMetrics();
-        int width = metrics.widthPixels;
-        int height = metrics.heightPixels;
-
 
         dialogFragment.setDialogListener(new GotoDialogFragment.DialogListener() {
             @Override

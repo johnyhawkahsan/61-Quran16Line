@@ -5,38 +5,70 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     style="@style/Theme.MaterialComponents.Light.Dialog"
-    android:padding="10dp">
+    android:background="#FFFFFF">
 
-    <TextView
-        android:id="@+id/title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:text="Page No" />
+    <!-- Manually imitate an entire AlertDialog layout -->
+    <!-- See dialog specs on: https://material.google.com/components/dialogs.html#dialogs-specs -->
 
-
-    <EditText
-        android:id="@+id/editTextPageNo"
+    <!-- Title and content -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Enter Page No"
-        android:inputType="number" />
+        android:orientation="vertical"
+        android:paddingLeft="24dp"
+        android:paddingTop="24dp"
+        android:paddingRight="24dp">
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:text="Enter Page No" />
 
-    <Button
-        android:id="@+id/btnGo"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        style="@style/Widget.AppCompat.Button.Borderless"
-        android:text="Done" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:textSize="16sp"
+            android:text="Enter page no you want to go to" />
 
-    <Button
-        android:id="@+id/btnCancel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        style="@style/Widget.AppCompat.Button.Borderless"
-        android:text="Cancel" />
+        <EditText
+            android:id="@+id/editTextPageNo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="number"/>
+
+    </LinearLayout>
+
+    <!-- Action area -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:orientation="horizontal"
+        android:padding="8dp"
+        android:gravity="right">
+
+        <Button
+            android:id="@+id/btnCancel"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:background="@android:color/transparent"
+            android:text="Cancel"
+            android:textColor="@color/colorAccent" />
+
+        <Button
+            android:id="@+id/btnGo"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:layout_marginLeft="8dp"
+            android:background="@android:color/transparent"
+            android:text="Done"
+            android:textColor="@color/colorAccent" />
+
+    </LinearLayout>
 
 </LinearLayout>
+
+
+
