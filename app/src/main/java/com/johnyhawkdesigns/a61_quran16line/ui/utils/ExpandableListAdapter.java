@@ -10,6 +10,7 @@ import android.widget.BaseExpandableListAdapter;
 import android.widget.TextView;
 
 import com.johnyhawkdesigns.a61_quran16line.R;
+import com.shockwave.pdfium.PdfDocument;
 
 import java.util.HashMap;
 import java.util.List;
@@ -18,11 +19,11 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 
     private Context context;
     private List<MenuModel> listDataHeader;
-    private HashMap<MenuModel, List<MenuModel>> listDataChild;
+    private HashMap<MenuModel, List<PdfDocument.Bookmark>> listDataChild;
 
     public ExpandableListAdapter(Context context,
                                  List<MenuModel> listDataHeader,
-                                 HashMap<MenuModel, List<MenuModel>> listChildData) {
+                                 HashMap<MenuModel, List<PdfDocument.Bookmark>> listChildData) {
 
         this.context = context;
         this.listDataHeader = listDataHeader;
@@ -30,9 +31,9 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
     }
 
     @Override
-    public MenuModel getChild(int groupPosition, int childPosititon) {
+    public PdfDocument.Bookmark getChild(int groupPosition, int childPosition) {
         return this.listDataChild.get(this.listDataHeader.get(groupPosition))
-                .get(childPosititon);
+                .get(childPosition);
     }
 
     @Override
@@ -44,7 +45,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
     public View getChildView(int groupPosition, final int childPosition,
                              boolean isLastChild, View convertView, ViewGroup parent) {
 
-        final String childText = getChild(groupPosition, childPosition).menuName;
+        final String childText = getChild(groupPosition, childPosition).getTitle();
 
         if (convertView == null) {
             LayoutInflater infalInflater = (LayoutInflater) this.context

@@ -13,6 +13,7 @@ import android.view.View;
 
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.core.view.GravityCompat;
+import androidx.fragment.app.FragmentManager;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -24,6 +25,7 @@ import com.johnyhawkdesigns.a61_quran16line.ui.home.HomeFragment;
 import com.johnyhawkdesigns.a61_quran16line.ui.utils.ExpandableListAdapter;
 import com.johnyhawkdesigns.a61_quran16line.ui.utils.MenuModel;
 import com.johnyhawkdesigns.a61_quran16line.ui.utils.Utils;
+import com.shockwave.pdfium.PdfDocument;
 
 import androidx.drawerlayout.widget.DrawerLayout;
 
@@ -40,7 +42,7 @@ import java.util.List;
 
 public class NavigationDrawer
         extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener, HomeFragment.HomeFragmentListener {
 
     private static final String TAG = NavigationDrawer.class.getSimpleName();
 
@@ -52,15 +54,15 @@ public class NavigationDrawer
     boolean isStatusBarVisible;
 
     NavController navController;
-
     DrawerLayout drawer;
 
+    List<PdfDocument.Bookmark> tableOfContents;
 
     // TODO: Related to ExpandableListView
     ExpandableListAdapter expandableListAdapter;
     ExpandableListView expandableListView;
     List<MenuModel> headerList = new ArrayList<>(); // Holds headers of the Navigation Drawers
-    HashMap<MenuModel, List<MenuModel>> childList = new HashMap<>(); // Holds children of the Navigation Drawers
+    HashMap<MenuModel, List<PdfDocument.Bookmark>> childList = new HashMap<>(); // Holds children of the Navigation Drawers
 
 
     @Override
@@ -211,17 +213,10 @@ public class NavigationDrawer
         menuModel = new MenuModel(Utils.MenuName_Index, true, true, 1);
         headerList.add(menuModel);
 
-        List<MenuModel> childModelsList = new ArrayList<>();
-        MenuModel childModel = new MenuModel("Parah-1", false, false, 1);
-        childModelsList.add(childModel);
-
-        childModel = new MenuModel("Parah-2", false, false, 2);
-        childModelsList.add(childModel);
-
 
         if (menuModel.hasChildren) {
             Log.d(TAG, "prepareMenuData: ");
-            childList.put(menuModel, childModelsList);
+            childList.put(menuModel, tableOfContents);
         }
 
         menuModel = new MenuModel(Utils.MenuName_Bookmarks, true, true, 0);
@@ -279,26 +274,55 @@ public class NavigationDrawer
             public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
 
                 if (childList.get(headerList.get(groupPosition)) != null) {
-                    MenuModel model = childList.get(headerList.get(groupPosition)).get(childPosition);
+                    PdfDocument.Bookmark bookmark = childList.get(headerList.get(groupPosition)).get(childPosition);
 
-                    Log.d(TAG, "onChildClick: model.parahNo = " + model.parahNo);
-                    switch (model.parahNo) {
-                        case 1:
-                            // need to redirect to parah -1
-                            Toast.makeText(NavigationDrawer.this, "Redirecting to Parah - " + model.parahNo, Toast.LENGTH_SHORT).show();
-                            break;
-
-                        case 2:
-                            // need to redirect to parah -1
-                            Toast.makeText(NavigationDrawer.this, "Redirecting to Parah - " + model.parahNo, Toast.LENGTH_SHORT).show();
-                            break;
-
-                        default:
-                            break;
-                    }
+//                    Log.d(TAG, "onChildClick: bookmark.parahNo = " + bookmark.getTitle());
+//                    switch (bookmark.parahNo) {
+//                        case 1:
+//                            // need to redirect to parah -1
+//                            Toast.makeText(NavigationDrawer.this, "Redirecting to Parah - " + model.parahNo, Toast.LENGTH_SHORT).show();
+//                            break;
+//
+//                        case 2:
+//                            // need to redirect to parah -1
+//                            Toast.makeText(NavigationDrawer.this, "Redirecting to Parah - " + model.parahNo, Toast.LENGTH_SHORT).show();
+//                            break;
+//
+//                        default:
+//                            break;
+//                    }
+//
                 }
                 return false;
             }
         });
+    }
+
+
+    // Interface method to return tableOfContents from HomeFragment
+    @Override
+    public void returnBookmarks(List<PdfDocument.Bookmark> tableOfContents) {
+        this.tableOfContents = tableOfContents;
+        printBookmarksTree(tableOfContents);
+    }
+
+    @Override
+    public void fullscreen(Boolean isFullscreen) {
+        Log.d(TAG, "fullscreen: isFullscreen = " + isFullscreen);
+    }
+
+    // Bookmarks is a class which holds few properties like title, pageIndex etc
+    public void printBookmarksTree(List<PdfDocument.Bookmark> tree) {
+
+        for (PdfDocument.Bookmark bookmark : tree) {
+
+            Log.d(TAG, "printBookmarksTree: bookmark.getTitle = " + bookmark.getTitle());
+            Log.d(TAG, "printBookmarksTree: bookmark.getPageIdx = " + bookmark.getPageIdx());
+
+            // if bookmark has children, then we can also put this inside method and retrieve children
+            if (bookmark.hasChildren()) {
+                printBookmarksTree(bookmark.getChildren());
+            }
+        }
     }
 }

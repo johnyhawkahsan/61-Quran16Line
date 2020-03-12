@@ -1,5 +1,6 @@
 package com.johnyhawkdesigns.a61_quran16line.ui.home;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -40,9 +41,15 @@ public class HomeFragment
     static int totalNoOfPages;
     Button gotoButton;
 
+    Boolean isFullscreen;
+
+    private HomeFragmentListener homeFragmentListener;
+
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_home, container, false);
+
+        isFullscreen = true; // at the start of the app, we want the app to be fullscreen
 
         // Showing pdf file
         pdfView = view.findViewById(R.id.pdfViewQuran);
@@ -71,7 +78,17 @@ public class HomeFragment
 
         // Here, we are accessing method available inside "NavigationDrawer" activity. We could also use Interface method here.
         ((NavigationDrawer)getActivity()).toggleFullscreen();
+
+
+        if (isFullscreen){
+            isFullscreen = false;
+        } else {
+            isFullscreen = true;
+        }
+        homeFragmentListener.fullscreen(isFullscreen);
+
         toggleGotoButton();
+
 
         return true;
     }
@@ -96,22 +113,11 @@ public class HomeFragment
         PdfDocument.Meta meta = pdfView.getDocumentMeta();
         Log.d(TAG, "title = " + meta.getTitle());
 
-        printBookmarksTree(pdfView.getTableOfContents());
+        homeFragmentListener.returnBookmarks(pdfView.getTableOfContents());
     }
 
-    public void printBookmarksTree(List<PdfDocument.Bookmark> tree) {
 
-        for (PdfDocument.Bookmark bookmark : tree) {
 
-            Log.d(TAG, "printBookmarksTree: bookmark.getTitle = " + bookmark.getTitle());
-            Log.d(TAG, "printBookmarksTree: bookmark.getPageIdx = " + bookmark.getPageIdx());
-
-            // if bookmark has children, then we can also put this inside method and retrieve children
-            if (bookmark.hasChildren()) {
-                printBookmarksTree(bookmark.getChildren());
-            }
-        }
-    }
 
     @Override
     public void onPageChanged(int page, int pageCount) { // pageCount is same as totalNoOfPages
@@ -138,4 +144,27 @@ public class HomeFragment
 
     }
 
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        try {
+            homeFragmentListener = (HomeFragmentListener) context;
+        } catch (ClassCastException castException) {
+            /** The activity does not implement the listener. */
+        }
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        homeFragmentListener = null;
+    }
+
+    public interface HomeFragmentListener{
+        public void returnBookmarks (List<PdfDocument.Bookmark> tableOfContents);
+        public void fullscreen(Boolean isFullscreen);
+    }
+
 }
+
+
