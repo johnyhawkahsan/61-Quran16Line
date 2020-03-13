@@ -60,6 +60,8 @@ public class NavigationDrawer
     DrawerLayout drawer;
 
     List<PdfDocument.Bookmark> tableOfContents;
+    List<PdfDocument.Bookmark> parahContents;
+    List<PdfDocument.Bookmark> soorahContents;
 
     // TODO: Related to ExpandableListView
     ExpandableListAdapter expandableListAdapter;
@@ -286,11 +288,39 @@ public class NavigationDrawer
 
             // if bookmark has children, then we can also put this inside method and retrieve children
             if (bookmark.hasChildren()) {
-                printBookmarksTree(bookmark.getChildren());
+                Log.d(TAG, "printBookmarksTree: bookmark.hasChildren() bookmark.getTitle() = " + bookmark.getTitle());
+
+                // differentiate between parah and soorah
+                if (bookmark.getTitle().equals("parah")){
+
+                    Log.d(TAG, "printBookmarksTree: parah");
+                    populateParahContents(bookmark.getChildren());
+
+                } else if (bookmark.getTitle().equals("soorah")) {
+
+                    Log.d(TAG, "printBookmarksTree: parah");
+                    populateSoorahContents(bookmark.getChildren());
+                }
+
+                // printBookmarksTree(bookmark.getChildren()); // this method also prints all the children as well
+
+            } else {
+                Log.d(TAG, "printBookmarksTree: no children");
             }
         }
     }
 
+    private void populateSoorahContents(List<PdfDocument.Bookmark> soorahContents) {
+        for (PdfDocument.Bookmark soorah : soorahContents) {
+            //soorahContents.add(soorah);
+            Log.d(TAG, "populateSoorahContents: adding soorah to list = " + soorah.getTitle() );
+        }
+        //this.soorahContents = soorahContents;
+    }
+
+    private void populateParahContents(List<PdfDocument.Bookmark> parahContents) {
+
+    }
 
 
     @Override
