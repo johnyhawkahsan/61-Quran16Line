@@ -32,4 +32,13 @@
         android:backgroundTint="@color/colorPrimaryDark"
         app:srcCompat="@drawable/ic_add" />
 
+    <Button
+        android:id="@+id/gotoButton"
+        style="@style/TextAppearance.AppCompat.Caption"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:text="Go To"
+        android:layout_gravity="bottom|center_horizontal" />
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
