@@ -3,7 +3,6 @@ package com.johnyhawkdesigns.a61_quran16line;
 import android.os.Bundle;
 
 import com.github.barteksc.pdfviewer.PDFView;
-import com.github.barteksc.pdfviewer.util.Util;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -14,7 +13,6 @@ import android.view.View;
 
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.core.view.GravityCompat;
-import androidx.fragment.app.FragmentManager;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -42,7 +40,6 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 
 public class NavigationDrawer
         extends AppCompatActivity
@@ -111,6 +108,10 @@ public class NavigationDrawer
         gotoButton = findViewById(R.id.gotoButton);
         gotoButton.setOnClickListener(this);
         toggleViews();
+
+        // Initialize bookmark lists
+        parahContents = new ArrayList<>();
+        soorahContents = new ArrayList<>();
     }
 
 
@@ -176,10 +177,52 @@ public class NavigationDrawer
         this.tableOfContents = tableOfContents;
 
         // NOTE: Moved prepareMenuData(); populateExpandableList(); here because until @loadComplete in HomeFragment is not done, we don't have any bookmarks so tableOfContents was null.
+        printBookmarksTree(tableOfContents);
         prepareMenuData();
         populateExpandableList();
-        printBookmarksTree(tableOfContents);
     }
+
+    // Bookmarks is a class which holds few properties like title, pageIndex etc
+    public void printBookmarksTree(List<PdfDocument.Bookmark> tree) {
+
+        for (PdfDocument.Bookmark bookmark : tree) {
+
+            // if bookmark has children, then we can also put this inside method and retrieve children
+            if (bookmark.hasChildren()) {
+
+                // differentiate between parah and soorah
+                if (bookmark.getTitle().equals("parah")){
+                    Log.d(TAG, "printBookmarksTree: populateParahContents");
+                    populateParahContents(bookmark.getChildren());
+                } else if (bookmark.getTitle().equals("soorah")) {
+                    Log.d(TAG, "printBookmarksTree: populateSoorahContents");
+                    populateSoorahContents(bookmark.getChildren());
+                }
+            } else {
+                Log.d(TAG, "printBookmarksTree: no children");
+            }
+        }
+    }
+
+    private void populateSoorahContents(List<PdfDocument.Bookmark> list) {
+        this.soorahContents = list; // it is simpler than using for loop - just assign the list
+
+/*      // we can use for loop to add items individually to the soorahContents
+        for (PdfDocument.Bookmark soorah : list) {
+            //soorahContents.add(soorah); // use for loop to add all items to soorahContents
+            Log.d(TAG, "populateSoorahContents: adding soorah to list = " + soorah.getTitle() );
+}*/
+
+        Log.d(TAG, "populateSoorahContents: soorahContents.size() = " + soorahContents.size());
+
+    }
+
+    private void populateParahContents(List<PdfDocument.Bookmark> list) {
+        this.parahContents = list; // it is simpler than using for loop - just assign the list
+
+    }
+
+
 
     private void prepareMenuData() {
 
@@ -193,19 +236,28 @@ public class NavigationDrawer
                 childList.put(menuModel, null); // null means it doesn't have children
             }
 
-            menuModel = new MenuModel(Utils.MenuName_Index, true, true, 1);
+            menuModel = new MenuModel(Utils.MenuName_Parah, true, true, 1);
             headerList.add(menuModel);
-
-
-
             if (menuModel.hasChildren) {
-                Log.d(TAG, "prepareMenuData: ");
-                if (tableOfContents.size() > 1){
-                    Log.d(TAG, "prepareMenuData: size = " + tableOfContents.size());
+                Log.d(TAG, "prepareParahData: ");
+                if (parahContents.size() > 1){
+                    Log.d(TAG, "prepareParahData: size = " + parahContents.size());
                 } else {
-                    Log.d(TAG, "prepareMenuData: less than 1");
+                    Log.d(TAG, "prepareParahData: less than 1");
                 }
-                childList.put(menuModel, tableOfContents);
+                childList.put(menuModel, parahContents);
+            }
+
+            menuModel = new MenuModel(Utils.MenuName_Soorah, true, true, 1);
+            headerList.add(menuModel);
+            if (menuModel.hasChildren) {
+                Log.d(TAG, "prepareSoorahData: ");
+                if (soorahContents.size() > 1){
+                    Log.d(TAG, "prepareSoorahData: size = " + soorahContents.size());
+                } else {
+                    Log.d(TAG, "prepareSoorahData: less than 1");
+                }
+                childList.put(menuModel, soorahContents);
             }
 
             menuModel = new MenuModel(Utils.MenuName_Bookmarks, true, true, 0);
@@ -237,15 +289,19 @@ public class NavigationDrawer
                             drawer.closeDrawer(Gravity.LEFT);
                             break;
 
-                        case 1: // Index
-                            Log.d(TAG, "onGroupClick: Index");
+                        case 1: // Parah
+                            Log.d(TAG, "onGroupClick: Parah");
                             break;
 
-                        case 2: // Bookmarks
+                        case 2: // Soorah
+                            Log.d(TAG, "onGroupClick: Soorah");
+                            break;
+
+                        case 3: // Bookmarks
                             Log.d(TAG, "onGroupClick: Bookmarks");
                             break;
 
-                        case 3: // About
+                        case 4: // About
                             // if we are currently on some other fragment, we need to launch navigate method, otherwise, we only need to close drawer
                             navController.navigate(R.id.nav_about); // navigate to this fragment
                             drawer.closeDrawer(Gravity.LEFT);
@@ -276,50 +332,6 @@ public class NavigationDrawer
                 return false;
             }
         });
-    }
-
-    // Bookmarks is a class which holds few properties like title, pageIndex etc
-    public void printBookmarksTree(List<PdfDocument.Bookmark> tree) {
-
-        for (PdfDocument.Bookmark bookmark : tree) {
-
-            Log.d(TAG, "printBookmarksTree: bookmark.getTitle = " + bookmark.getTitle());
-            Log.d(TAG, "printBookmarksTree: bookmark.getPageIdx = " + bookmark.getPageIdx());
-
-            // if bookmark has children, then we can also put this inside method and retrieve children
-            if (bookmark.hasChildren()) {
-                Log.d(TAG, "printBookmarksTree: bookmark.hasChildren() bookmark.getTitle() = " + bookmark.getTitle());
-
-                // differentiate between parah and soorah
-                if (bookmark.getTitle().equals("parah")){
-
-                    Log.d(TAG, "printBookmarksTree: parah");
-                    populateParahContents(bookmark.getChildren());
-
-                } else if (bookmark.getTitle().equals("soorah")) {
-
-                    Log.d(TAG, "printBookmarksTree: parah");
-                    populateSoorahContents(bookmark.getChildren());
-                }
-
-                // printBookmarksTree(bookmark.getChildren()); // this method also prints all the children as well
-
-            } else {
-                Log.d(TAG, "printBookmarksTree: no children");
-            }
-        }
-    }
-
-    private void populateSoorahContents(List<PdfDocument.Bookmark> soorahContents) {
-        for (PdfDocument.Bookmark soorah : soorahContents) {
-            //soorahContents.add(soorah);
-            Log.d(TAG, "populateSoorahContents: adding soorah to list = " + soorah.getTitle() );
-        }
-        //this.soorahContents = soorahContents;
-    }
-
-    private void populateParahContents(List<PdfDocument.Bookmark> parahContents) {
-
     }
 
 
