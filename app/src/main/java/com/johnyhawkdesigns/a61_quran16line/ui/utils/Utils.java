@@ -2,6 +2,7 @@ package com.johnyhawkdesigns.a61_quran16line.ui.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
@@ -12,7 +13,7 @@ import static android.content.Context.MODE_PRIVATE;
 public class Utils {
 
 
-    public static final String BOOKMARKS_PREFERENCES = null;
+    public static final String BOOKMARKS_PREFERENCES = "pref_bookmarks";
 
     public static final String MenuName_Home = "Home";
     public static final String MenuName_Parah = "Parah";
@@ -20,29 +21,5 @@ public class Utils {
     public static final String MenuName_Bookmarks = "Bookmarks";
     public static final String MenuName_About = "About";
 
-    public void saveBookmark(PDFView pdfView, Context context){
-        int bookmarkedPage = pdfView.getCurrentPage();
 
-        //bookmarkedPage is the page which has bookmark
-        SharedPreferences.Editor editor = context.getSharedPreferences(BOOKMARKS_PREFERENCES, MODE_PRIVATE).edit();
-        editor.putBoolean("itemID", true);
-        editor.putInt("bookmarkedPageNum", bookmarkedPage);
-        editor.apply();
-        Toast.makeText(context, "Save bookMark", Toast.LENGTH_SHORT).show();
-    }
-
-    public void getBookmarkedPage(PDFView pdfView, Context context){
-        //TODO load page saved in share preferance
-        SharedPreferences preferences = context.getSharedPreferences(BOOKMARKS_PREFERENCES, MODE_PRIVATE);
-        boolean isBookmark = preferences.getBoolean("itemID", false);
-        int bookmarkedPage = preferences.getInt("bookmarkedPageNum", 0);
-        pdfView.jumpTo(bookmarkedPage, true);
-        Toast.makeText(context, " bookMark", Toast.LENGTH_SHORT).show();
-
-        // the bookmarked icon
-
-        if( bookmarkedPage == pdfView.getCurrentPage()) {
-            // bookmarkIcon.setVisibility(View.VISIBLE);
-        }
-    }
 }

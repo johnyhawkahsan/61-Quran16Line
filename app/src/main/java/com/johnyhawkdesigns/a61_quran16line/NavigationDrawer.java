@@ -1,5 +1,7 @@
 package com.johnyhawkdesigns.a61_quran16line;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import com.github.barteksc.pdfviewer.PDFView;
@@ -40,6 +42,7 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class NavigationDrawer
         extends AppCompatActivity
@@ -246,10 +249,35 @@ public class NavigationDrawer
 
             menuModel = new MenuModel(Utils.MenuName_Bookmarks, true, true, 0);
             headerList.add(menuModel);
+            // add bookmarks
+            if (menuModel.hasChildren) {
+                // get shared preferences
+                getBookmarkedPages(this);
+            }
 
             menuModel = new MenuModel(Utils.MenuName_About, true, false, 0);
             headerList.add(menuModel);
         }
+
+    }
+
+    public void getBookmarkedPages(Context context){
+
+        SharedPreferences preferences = context.getSharedPreferences(Utils.BOOKMARKS_PREFERENCES, MODE_PRIVATE);
+
+        Log.d(TAG, "getBookmarkedPages: preferences.getAll().size() = " + preferences.getAll().size());
+        Map<String, ?> allEntries = preferences.getAll();
+        for (Map.Entry<String, ?> entry : allEntries.entrySet()) {
+            Log.d("map values", entry.getKey() + ": " + entry.getValue().toString());
+        }
+
+        boolean isBookmark = preferences.getBoolean("itemID", false);
+        int pageNo = preferences.getInt("pageNo", 0);
+        String bookmarkTitle = preferences.getString("bookmarkTitle", null);
+        //pdfView.jumpTo(pageNo, true);
+        Toast.makeText(context, bookmarkTitle, Toast.LENGTH_SHORT).show();
+
+        // the bookmarked icon
 
     }
 
@@ -311,8 +339,8 @@ public class NavigationDrawer
                     pdfView.jumpTo(pageNo);
                     drawer.closeDrawer(Gravity.LEFT);
 
-                    Log.d(TAG, "onChildClick: bookmarkName = " + bookmarkName);
-                    Toast.makeText(NavigationDrawer.this, "Redirect to " + bookmarkName, Toast.LENGTH_SHORT).show();
+                    Log.d(TAG, "onChildClick: bookmarkName = " + bookmarkName + ", pageNo = " + pageNo);
+                    Toast.makeText(NavigationDrawer.this, "Parah = " + bookmarkName + ", pageNo = " + pageNo, Toast.LENGTH_SHORT).show();
 
                 }
                 return false;

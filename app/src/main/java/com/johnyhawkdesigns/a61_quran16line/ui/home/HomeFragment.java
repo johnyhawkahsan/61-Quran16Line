@@ -1,6 +1,7 @@
 package com.johnyhawkdesigns.a61_quran16line.ui.home;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -8,6 +9,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -21,12 +23,15 @@ import com.github.barteksc.pdfviewer.scroll.DefaultScrollHandle;
 import com.github.barteksc.pdfviewer.util.FitPolicy;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
-import com.johnyhawkdesigns.a61_quran16line.NavigationDrawer;
 import com.johnyhawkdesigns.a61_quran16line.R;
+import com.johnyhawkdesigns.a61_quran16line.ui.dialog.BookmarkDialogFragment;
 import com.johnyhawkdesigns.a61_quran16line.ui.dialog.GotoDialogFragment;
+import com.johnyhawkdesigns.a61_quran16line.ui.utils.Utils;
 import com.shockwave.pdfium.PdfDocument;
 
 import java.util.List;
+
+import static android.content.Context.MODE_PRIVATE;
 
 public class HomeFragment
         extends Fragment
@@ -50,10 +55,6 @@ public class HomeFragment
 
         isFullscreen = true; // at the start of the app, we want the app to be fullscreen
 
-        setupFab(view);
-        gotoButton = view.findViewById(R.id.gotoButton);
-        gotoButton.setOnClickListener(this);
-
         // Showing pdf file
         pdfView = view.findViewById(R.id.pdfViewQuran);
         pdfView.fromAsset(PDF_FILE)
@@ -64,6 +65,10 @@ public class HomeFragment
                 .spacing(2) // in dp
                 .pageFitPolicy(FitPolicy.BOTH)
                 .load();
+
+        gotoButton = view.findViewById(R.id.gotoButton);
+        gotoButton.setOnClickListener(this);
+        setupFab(view);
 
         return view;
     }
@@ -76,11 +81,32 @@ public class HomeFragment
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Bookmark Saved", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+
+                BookmarkDialogFragment dialogFragment = BookmarkDialogFragment.newInstance();
+                dialogFragment.show(getActivity().getSupportFragmentManager(), "dialog");
+                dialogFragment.setBookmarkDialogListener(new BookmarkDialogFragment.BookmarkDialogListener() {
+                    @Override
+                    public void onEnterTitle(String bookmarkTitle) {
+                        Log.d(TAG, "onEnterTitle: bookmarkTitle = " + bookmarkTitle);
+                        // store this into bookmarks shared preferences
+                        saveBookmark(bookmarkTitle, pdfView.getCurrentPage(), getActivity());
+                    }
+                });
+
             }
         });
     }
+
+    public void saveBookmark(String bookmarkTitle, int pageNo, Context context){
+
+        SharedPreferences.Editor editor = context.getSharedPreferences(Utils.BOOKMARKS_PREFERENCES, MODE_PRIVATE).edit();
+        editor.putString("bookmarkTitle", bookmarkTitle);
+        editor.putInt("pageNo", pageNo);
+        editor.apply();
+        Toast.makeText(context, "Saved bookMark", Toast.LENGTH_SHORT).show();
+    }
+
+
 
     @Override
     public boolean onTap(MotionEvent e) {
@@ -157,7 +183,7 @@ public class HomeFragment
     public void onClick(View v) {
         GotoDialogFragment dialogFragment = GotoDialogFragment.newInstance(pdfView.getPageCount()); // no of pages are used as bundle arguments
         dialogFragment.show(getActivity().getSupportFragmentManager(), "dialog");
-        dialogFragment.setDialogListener(new GotoDialogFragment.DialogListener() {
+        dialogFragment.setGotoDialogListener(new GotoDialogFragment.GotoDialogListener() {
             @Override
             public void onEnterPageNo(int pageNo) {
                 Log.d(TAG, "onEnterPageNo: pageNo = " + pageNo);
