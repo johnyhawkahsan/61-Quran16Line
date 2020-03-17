@@ -19,6 +19,8 @@ import com.github.barteksc.pdfviewer.listener.OnPageChangeListener;
 import com.github.barteksc.pdfviewer.listener.OnTapListener;
 import com.github.barteksc.pdfviewer.scroll.DefaultScrollHandle;
 import com.github.barteksc.pdfviewer.util.FitPolicy;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
 import com.johnyhawkdesigns.a61_quran16line.NavigationDrawer;
 import com.johnyhawkdesigns.a61_quran16line.R;
 import com.johnyhawkdesigns.a61_quran16line.ui.dialog.GotoDialogFragment;
@@ -28,17 +30,17 @@ import java.util.List;
 
 public class HomeFragment
         extends Fragment
-        implements OnTapListener, OnLoadCompleteListener, OnPageChangeListener{
+        implements OnTapListener, OnLoadCompleteListener, OnPageChangeListener, View.OnClickListener {
 
     private static final String TAG = HomeFragment.class.getSimpleName();
     private static final String PDF_FILE = "quran.pdf";
 
     public PDFView pdfView;
-
     static int totalNoOfPages;
-
-
     Boolean isFullscreen;
+
+    FloatingActionButton fab;
+    Button gotoButton;
 
     private HomeFragmentListener homeFragmentListener;
 
@@ -47,6 +49,10 @@ public class HomeFragment
         View view = inflater.inflate(R.layout.fragment_home, container, false);
 
         isFullscreen = true; // at the start of the app, we want the app to be fullscreen
+
+        setupFab(view);
+        gotoButton = view.findViewById(R.id.gotoButton);
+        gotoButton.setOnClickListener(this);
 
         // Showing pdf file
         pdfView = view.findViewById(R.id.pdfViewQuran);
@@ -63,21 +69,49 @@ public class HomeFragment
     }
 
 
+
+
+    public void setupFab(View view) {
+        fab = view.findViewById(R.id.fabBookmark);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Snackbar.make(view, "Bookmark Saved", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+            }
+        });
+    }
+
     @Override
     public boolean onTap(MotionEvent e) {
-        Log.d(TAG, "onTap: pdfView.getCurrentPage() = " + pdfView.getCurrentPage());
 
         if (isFullscreen){
+            showGotoButton();
+            fab.show();
+            homeFragmentListener.fullscreen(isFullscreen); // passing fullscreen boolean using interface method
             isFullscreen = false;
         } else {
+            hideGotoButton();
+            fab.hide();
+            homeFragmentListener.fullscreen(isFullscreen); // passing fullscreen boolean using interface method
             isFullscreen = true;
         }
         //((NavigationDrawer)getActivity()).toggleFullscreen(); // Old method that I used before implementing interface method
-        homeFragmentListener.fullscreen(isFullscreen); // passing fullscreen boolean using interface method
 
         return true;
     }
 
+    private void showGotoButton() {
+        if (gotoButton.getVisibility() == View.INVISIBLE){
+            gotoButton.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void hideGotoButton() {
+        if (gotoButton.getVisibility() == View.VISIBLE){
+            gotoButton.setVisibility(View.INVISIBLE);
+        }
+    }
 
     // NOTE: pdfView.getPageCount() returned 0 inside onCreate and onCreateView.
     @Override
@@ -98,7 +132,7 @@ public class HomeFragment
     @Override
     public void onPageChanged(int page, int pageCount) { // pageCount is same as totalNoOfPages
         int correctedPageNo = (page + 1);
-        homeFragmentListener.pageChanged(correctedPageNo , pageCount);
+        gotoButton.setText(correctedPageNo + " / " + pageCount);
     }
 
 
@@ -119,12 +153,25 @@ public class HomeFragment
         homeFragmentListener = null;
     }
 
+    @Override
+    public void onClick(View v) {
+        GotoDialogFragment dialogFragment = GotoDialogFragment.newInstance(pdfView.getPageCount()); // no of pages are used as bundle arguments
+        dialogFragment.show(getActivity().getSupportFragmentManager(), "dialog");
+        dialogFragment.setDialogListener(new GotoDialogFragment.DialogListener() {
+            @Override
+            public void onEnterPageNo(int pageNo) {
+                Log.d(TAG, "onEnterPageNo: pageNo = " + pageNo);
+                pdfView.jumpTo(pageNo); // go to specific page
+            }
+        });
+    }
+
 
     public interface HomeFragmentListener{
         public void returnBookmarks (List<PdfDocument.Bookmark> tableOfContents);
         public void fullscreen(Boolean isFullscreen);
         public void passPdfView(PDFView pdfView);
-        public void pageChanged(int pageNo, int pageCount);
+        //public void pageChanged(int pageNo, int pageCount); // not using now because I moved goto button in fragment
     }
 
 }

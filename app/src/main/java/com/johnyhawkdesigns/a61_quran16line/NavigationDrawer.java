@@ -43,15 +43,13 @@ import java.util.List;
 
 public class NavigationDrawer
         extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, HomeFragment.HomeFragmentListener, View.OnClickListener {
+        implements NavigationView.OnNavigationItemSelectedListener, HomeFragment.HomeFragmentListener {
 
     private static final String TAG = NavigationDrawer.class.getSimpleName();
 
     private AppBarConfiguration mAppBarConfiguration;
     Toolbar toolbar;
     View decorView;
-    FloatingActionButton fab;
-    boolean isStatusBarVisible;
 
     NavController navController;
     DrawerLayout drawer;
@@ -68,7 +66,7 @@ public class NavigationDrawer
 
     // I'm returning this pdfView from HomeFragment using interface method
     PDFView pdfView;
-    Button gotoButton;
+
 
 
     @Override
@@ -81,7 +79,6 @@ public class NavigationDrawer
 
         decorView = getWindow().getDecorView(); // this view can be used to show or hide status bar
 
-        setupFab();
 
         drawer = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
@@ -91,8 +88,6 @@ public class NavigationDrawer
                 .build();
 
         setupNavController(navigationView);
-
-
 
         // TODO: Related to ExpandableListView
         expandableListView = findViewById(R.id.expandableListView);
@@ -105,26 +100,13 @@ public class NavigationDrawer
         toggle.syncState();
 
 
-        gotoButton = findViewById(R.id.gotoButton);
-        gotoButton.setOnClickListener(this);
-        toggleViews();
-
         // Initialize bookmark lists
         parahContents = new ArrayList<>();
         soorahContents = new ArrayList<>();
     }
 
 
-    public void setupFab() {
-        fab = findViewById(R.id.fabBookmark);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Bookmark Saved", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
-    }
+
 
 
     private void setupNavController(NavigationView navigationView) {
@@ -204,6 +186,7 @@ public class NavigationDrawer
         }
     }
 
+    // method to populate/extract Soorah bookmarks from tableOfContents
     private void populateSoorahContents(List<PdfDocument.Bookmark> list) {
         this.soorahContents = list; // it is simpler than using for loop - just assign the list
 
@@ -217,6 +200,7 @@ public class NavigationDrawer
 
     }
 
+    // method to populate/extract Parah bookmarks from tableOfContents
     private void populateParahContents(List<PdfDocument.Bookmark> list) {
         this.parahContents = list; // it is simpler than using for loop - just assign the list
 
@@ -280,8 +264,8 @@ public class NavigationDrawer
 
                 if (headerList.get(groupPosition).isGroup) { // checking for isGroup excludes all children
 
-                    switch (groupPosition) {
-                        case 0: // Home
+                    switch (headerList.get(groupPosition).menuName) {
+                        case Utils.MenuName_Home: // Home
                             // if current fragment is not nav_home, we need to launch navigate method, otherwise, we only need to close drawer
                             if (navController.getCurrentDestination().getId() != R.id.nav_home) {
                                 navController.navigate(R.id.nav_home); // navigate to Home fragment
@@ -289,19 +273,19 @@ public class NavigationDrawer
                             drawer.closeDrawer(Gravity.LEFT);
                             break;
 
-                        case 1: // Parah
+                        case Utils.MenuName_Parah: // Parah
                             Log.d(TAG, "onGroupClick: Parah");
                             break;
 
-                        case 2: // Soorah
+                        case Utils.MenuName_Soorah: // Soorah
                             Log.d(TAG, "onGroupClick: Soorah");
                             break;
 
-                        case 3: // Bookmarks
+                        case Utils.MenuName_Bookmarks: // Bookmarks
                             Log.d(TAG, "onGroupClick: Bookmarks");
                             break;
 
-                        case 4: // About
+                        case Utils.MenuName_About: // About
                             // if we are currently on some other fragment, we need to launch navigate method, otherwise, we only need to close drawer
                             navController.navigate(R.id.nav_about); // navigate to this fragment
                             drawer.closeDrawer(Gravity.LEFT);
@@ -321,13 +305,15 @@ public class NavigationDrawer
 
                 if (childList.get(headerList.get(groupPosition)) != null) {
 
-                    PdfDocument.Bookmark bookmark = childList.get(headerList.get(groupPosition)).get(childPosition);
-                    Log.d(TAG, "onChildClick: bookmark.getTitle() = " + bookmark.getTitle());
-                    Toast.makeText(NavigationDrawer.this, "Redirect to " + bookmark.getTitle(), Toast.LENGTH_SHORT).show();
-
+                    PdfDocument.Bookmark bookmark = childList.get(headerList.get(groupPosition)).get(childPosition); // single bookmark
+                    String bookmarkName = bookmark.getTitle();
                     int pageNo = (int) bookmark.getPageIdx();
                     pdfView.jumpTo(pageNo);
                     drawer.closeDrawer(Gravity.LEFT);
+
+                    Log.d(TAG, "onChildClick: bookmarkName = " + bookmarkName);
+                    Toast.makeText(NavigationDrawer.this, "Redirect to " + bookmarkName, Toast.LENGTH_SHORT).show();
+
                 }
                 return false;
             }
@@ -338,34 +324,19 @@ public class NavigationDrawer
     @Override
     public void fullscreen(Boolean isFullscreen) {
         Log.d(TAG, "fullscreen: isFullscreen = " + isFullscreen);
-        toggleViews();
-    }
-
-
-    private void toggleViews() {
-        if (gotoButton.getVisibility() == View.INVISIBLE || !isStatusBarVisible ){
-            showGotoButton();
+        if (isFullscreen){
             showStatusBar();
             showToolbar();
-            fab.show();
-        } else {
-            hideGotoButton();
+        }else {
             hideStatusBar();
             hideToolBar();
-            fab.hide();
         }
+
     }
 
-    private void showGotoButton() {
-        gotoButton.setVisibility(View.VISIBLE);
-    }
 
-    private void hideGotoButton() {
-        gotoButton.setVisibility(View.INVISIBLE);
-    }
 
     private void showStatusBar() {
-        isStatusBarVisible = true;
         int uiOptions = View.SYSTEM_UI_FLAG_VISIBLE; // Hide the status bar.
         decorView.setSystemUiVisibility(uiOptions);
     }
@@ -373,7 +344,6 @@ public class NavigationDrawer
     // Remember that you should never show the action bar if the status bar is hidden, so hide that too if necessary.
     // ActionBar actionBar = getActionBar(); actionBar.hide(); // NOTE: I'm hiding action bar using theme Theme.AppCompat.Light.NoActionBar"
     private void hideStatusBar() {
-        isStatusBarVisible = false;
         int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN; // Hide the status bar.
         decorView.setSystemUiVisibility(uiOptions);
 
@@ -397,25 +367,7 @@ public class NavigationDrawer
         this.pdfView = pdfView;
     }
 
-    @Override
-    public void pageChanged(int pageNo, int pageCount) {
-        gotoButton.setText(pageNo + " / " + pageCount);
-    }
 
 
 
-
-
-    @Override
-    public void onClick(View v) {
-        GotoDialogFragment dialogFragment = GotoDialogFragment.newInstance(pdfView.getPageCount()); // no of pages are used as bundle arguments
-        dialogFragment.show(getSupportFragmentManager(), "dialog");
-        dialogFragment.setDialogListener(new GotoDialogFragment.DialogListener() {
-            @Override
-            public void onEnterPageNo(int pageNo) {
-                Log.d(TAG, "onEnterPageNo: pageNo = " + pageNo);
-                pdfView.jumpTo(pageNo); // go to specific page
-            }
-        });
-    }
 }
