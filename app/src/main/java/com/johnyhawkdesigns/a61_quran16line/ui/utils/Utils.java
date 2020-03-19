@@ -14,6 +14,7 @@ public class Utils {
 
 
     public static final String BOOKMARKS_PREFERENCES = "pref_bookmarks";
+    public static final String LAST_PAGE_PREFERENCES = "last_page";
 
     public static final String MenuName_Home = "Home";
     public static final String MenuName_Parah = "Parah";

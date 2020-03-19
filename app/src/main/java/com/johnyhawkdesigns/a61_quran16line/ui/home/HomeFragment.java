@@ -21,8 +21,9 @@ import com.github.barteksc.pdfviewer.listener.OnPageChangeListener;
 import com.github.barteksc.pdfviewer.listener.OnTapListener;
 import com.github.barteksc.pdfviewer.scroll.DefaultScrollHandle;
 import com.github.barteksc.pdfviewer.util.FitPolicy;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.github.barteksc.pdfviewer.util.Util;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.johnyhawkdesigns.a61_quran16line.R;
 import com.johnyhawkdesigns.a61_quran16line.ui.dialog.BookmarkDialogFragment;
 import com.johnyhawkdesigns.a61_quran16line.ui.dialog.GotoDialogFragment;
@@ -97,20 +98,10 @@ public class HomeFragment
         });
     }
 
-    public void saveBookmark(String bookmarkTitle, int pageNo, Context context){
-
-        SharedPreferences.Editor editor = context.getSharedPreferences(Utils.BOOKMARKS_PREFERENCES, MODE_PRIVATE).edit();
-        editor.putString("bookmarkTitle", bookmarkTitle);
-        editor.putInt("pageNo", pageNo);
-        editor.apply();
-        Toast.makeText(context, "Saved bookMark", Toast.LENGTH_SHORT).show();
-    }
-
-
 
     @Override
     public boolean onTap(MotionEvent e) {
-
+        
         if (isFullscreen){
             showGotoButton();
             fab.show();
@@ -151,6 +142,9 @@ public class HomeFragment
 
         homeFragmentListener.returnBookmarks(pdfView.getTableOfContents()); // pass tableOfContents to Activity
         homeFragmentListener.passPdfView(pdfView); // pass pdfView to Activity
+
+        // once pdfView is loaded, we want to retrieve previously saved page
+        getBookmarkedPages(Utils.LAST_PAGE_PREFERENCES, getActivity());
     }
 
 
@@ -159,6 +153,40 @@ public class HomeFragment
     public void onPageChanged(int page, int pageCount) { // pageCount is same as totalNoOfPages
         int correctedPageNo = (page + 1);
         gotoButton.setText(correctedPageNo + " / " + pageCount);
+
+        // save last visited page in preferences each time the page is changed
+        saveBookmark(Utils.LAST_PAGE_PREFERENCES, page, getActivity());
+        Log.d(TAG, "onPageChanged: saving page = " + page + " in preferences");
+    }
+
+    // for random bookmarks, I want to add bookmarkTitle as a "key" for integer page no
+    public void saveBookmark(String bookmarkTitle, int pageNo, Context context){
+        SharedPreferences preferences = context.getSharedPreferences(Utils.BOOKMARKS_PREFERENCES, MODE_PRIVATE);
+        SharedPreferences.Editor editor = preferences.edit();
+
+        if (preferences.contains(bookmarkTitle) && preferences.getInt(bookmarkTitle, 0) == pageNo){ // if this key exists
+            // save last visited page in preferences
+            Log.d(TAG, "onPageChanged: already stored");
+        } else {
+            // save last visited page in preferences
+            editor.putInt(bookmarkTitle, pageNo);
+            editor.apply();
+            Log.d(TAG, "saveBookmark: Bookmark Saved " + "bookmarkTitle = " + bookmarkTitle + "pageNo = " + pageNo);
+            Toast.makeText(context, "Bookmark Saved", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    public void getBookmarkedPages(String bookmarkKey, Context context){
+
+        SharedPreferences preferences = context.getSharedPreferences(Utils.BOOKMARKS_PREFERENCES, MODE_PRIVATE);
+        int pageNo = preferences.getInt(bookmarkKey, 0);
+        // at 1st start of the app, we do not have any shared preferences
+        if (preferences.contains(Utils.LAST_PAGE_PREFERENCES )){
+            pdfView.jumpTo(pageNo, true);
+        }
+
+        Log.d(TAG, "getBookmarkedPages: pageNo = " + pageNo);
+        Toast.makeText(context, bookmarkKey, Toast.LENGTH_SHORT).show();
     }
 
 
@@ -171,7 +199,9 @@ public class HomeFragment
             /** The activity does not implement the listener. */
             Log.e(TAG, "onAttach: ", castException);
         }
+
     }
+
 
     @Override
     public void onDetach() {
@@ -181,15 +211,19 @@ public class HomeFragment
 
     @Override
     public void onClick(View v) {
-        GotoDialogFragment dialogFragment = GotoDialogFragment.newInstance(pdfView.getPageCount()); // no of pages are used as bundle arguments
-        dialogFragment.show(getActivity().getSupportFragmentManager(), "dialog");
-        dialogFragment.setGotoDialogListener(new GotoDialogFragment.GotoDialogListener() {
-            @Override
-            public void onEnterPageNo(int pageNo) {
-                Log.d(TAG, "onEnterPageNo: pageNo = " + pageNo);
-                pdfView.jumpTo(pageNo); // go to specific page
-            }
-        });
+
+        if (v.getId() == R.id.gotoButton){
+            GotoDialogFragment dialogFragment = GotoDialogFragment.newInstance(pdfView.getPageCount()); // no of pages are used as bundle arguments
+            dialogFragment.show(getActivity().getSupportFragmentManager(), "dialog");
+            dialogFragment.setGotoDialogListener(new GotoDialogFragment.GotoDialogListener() {
+                @Override
+                public void onEnterPageNo(int pageNo) {
+                    Log.d(TAG, "onEnterPageNo: pageNo = " + pageNo);
+                    pdfView.jumpTo(pageNo); // go to specific page
+                }
+            });
+        }
+
     }
 
 

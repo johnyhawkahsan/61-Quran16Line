@@ -24,6 +24,7 @@ import androidx.navigation.ui.NavigationUI;
 import com.google.android.material.navigation.NavigationView;
 import com.johnyhawkdesigns.a61_quran16line.ui.dialog.GotoDialogFragment;
 import com.johnyhawkdesigns.a61_quran16line.ui.home.HomeFragment;
+import com.johnyhawkdesigns.a61_quran16line.ui.utils.Bookmark;
 import com.johnyhawkdesigns.a61_quran16line.ui.utils.ExpandableListAdapter;
 import com.johnyhawkdesigns.a61_quran16line.ui.utils.MenuModel;
 import com.johnyhawkdesigns.a61_quran16line.ui.utils.Utils;
@@ -58,14 +59,17 @@ public class NavigationDrawer
     DrawerLayout drawer;
 
     List<PdfDocument.Bookmark> tableOfContents;
-    List<PdfDocument.Bookmark> parahContents;
-    List<PdfDocument.Bookmark> soorahContents;
+    List<Bookmark> tableOfContentsBookmark; // I am converting above PdfDocument.Bookmark to Bookmark
+    List<Bookmark> parahContents;
+    List<Bookmark> soorahContents;
+    List<Bookmark> bookmarkContents;
+
 
     // TODO: Related to ExpandableListView
     ExpandableListAdapter expandableListAdapter;
     ExpandableListView expandableListView;
     List<MenuModel> headerList = new ArrayList<>(); // Holds headers of the Navigation Drawers
-    HashMap<MenuModel, List<PdfDocument.Bookmark>> childList = new HashMap<>(); // Holds children of the Navigation Drawers
+    HashMap<MenuModel, List<Bookmark>> childList = new HashMap<>(); // Holds children of the Navigation Drawers
 
     // I'm returning this pdfView from HomeFragment using interface method
     PDFView pdfView;
@@ -81,7 +85,6 @@ public class NavigationDrawer
         setSupportActionBar(toolbar);
 
         decorView = getWindow().getDecorView(); // this view can be used to show or hide status bar
-
 
         drawer = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
@@ -104,8 +107,10 @@ public class NavigationDrawer
 
 
         // Initialize bookmark lists
+        tableOfContentsBookmark = new ArrayList<>(); // holds all Bookmark tableOfContents converted from original tableOfContents
         parahContents = new ArrayList<>();
         soorahContents = new ArrayList<>();
+        bookmarkContents = new ArrayList<>(); // holds bookmarks retrieved from shared preferences
     }
 
 
@@ -161,16 +166,42 @@ public class NavigationDrawer
     public void returnBookmarks(List<PdfDocument.Bookmark> tableOfContents) {
         this.tableOfContents = tableOfContents;
 
-        // NOTE: Moved prepareMenuData(); populateExpandableList(); here because until @loadComplete in HomeFragment is not done, we don't have any bookmarks so tableOfContents was null.
-        printBookmarksTree(tableOfContents);
-        prepareMenuData();
+        this.tableOfContentsBookmark = convertPdfDocumentBookmarkToBookmark(tableOfContents); // after converting tableOfContents, we get modified tableOfContents
+
+        printBookmarksTree(tableOfContentsBookmark);
+        prepareMenuData(); // NOTE: Moved prepareMenuData(); populateExpandableList(); here because until @loadComplete in HomeFragment is not done, we don't have any bookmarks so tableOfContents was null.
         populateExpandableList();
     }
 
-    // Bookmarks is a class which holds few properties like title, pageIndex etc
-    public void printBookmarksTree(List<PdfDocument.Bookmark> tree) {
+    // This method convert PdfDocument.Bookmark to Bookmark
+    private List<Bookmark> convertPdfDocumentBookmarkToBookmark(List<PdfDocument.Bookmark> tableOfContents) {
 
-        for (PdfDocument.Bookmark bookmark : tree) {
+        List<Bookmark> bookmarkList = new ArrayList<>();
+
+        for (PdfDocument.Bookmark pdfBookmark : tableOfContents){
+
+            String title = pdfBookmark.getTitle(); // PdfDocument.Bookmark title
+            int page = (int) pdfBookmark.getPageIdx(); // PdfDocument.Bookmark page no
+            Bookmark bookmark = new Bookmark(title, page);
+
+            // if this pdfBookmark has children ie, parah has children parah-1, parah-2 etc, we need to convert that as well.
+            if (pdfBookmark.hasChildren()){
+                bookmark.setChildren(convertPdfDocumentBookmarkToBookmark(pdfBookmark.getChildren())); // convert children into Bookmark as well
+            }
+
+            bookmarkList.add(bookmark); // add each bookmark in our list item in
+
+        }
+
+        Log.d(TAG, "convertPdfDocumentBookmarkToBookmark: bookmarkList.size() = " + bookmarkList.size());
+        return bookmarkList;
+    }
+
+
+    // Bookmarks is a class which holds few properties like title, pageIndex etc
+    public void printBookmarksTree(List<Bookmark> tree) {
+
+        for (Bookmark bookmark : tree) {
 
             // if bookmark has children, then we can also put this inside method and retrieve children
             if (bookmark.hasChildren()) {
@@ -183,6 +214,7 @@ public class NavigationDrawer
                     Log.d(TAG, "printBookmarksTree: populateSoorahContents");
                     populateSoorahContents(bookmark.getChildren());
                 }
+
             } else {
                 Log.d(TAG, "printBookmarksTree: no children");
             }
@@ -190,7 +222,7 @@ public class NavigationDrawer
     }
 
     // method to populate/extract Soorah bookmarks from tableOfContents
-    private void populateSoorahContents(List<PdfDocument.Bookmark> list) {
+    private void populateSoorahContents(List<Bookmark> list) {
         this.soorahContents = list; // it is simpler than using for loop - just assign the list
 
 /*      // we can use for loop to add items individually to the soorahContents
@@ -204,7 +236,7 @@ public class NavigationDrawer
     }
 
     // method to populate/extract Parah bookmarks from tableOfContents
-    private void populateParahContents(List<PdfDocument.Bookmark> list) {
+    private void populateParahContents(List<Bookmark> list) {
         this.parahContents = list; // it is simpler than using for loop - just assign the list
 
     }
@@ -216,14 +248,13 @@ public class NavigationDrawer
         // I'm using this if statement because I was sometimes getting duplicate items in List, because when onLoadComplete is fired multiple times, we will get this method "prepareMenuData" multiple times.
         if (headerList.size() < 1){
 
-            MenuModel menuModel = new MenuModel(Utils.MenuName_Home, true, false, 1); //Menu of Android Tutorial. No sub menus
+            MenuModel menuModel = new MenuModel(Utils.MenuName_Home, true, false); //Menu of Android Tutorial. No sub menus
             headerList.add(menuModel);
-
             if (!menuModel.hasChildren) {
                 childList.put(menuModel, null); // null means it doesn't have children
             }
 
-            menuModel = new MenuModel(Utils.MenuName_Parah, true, true, 1);
+            menuModel = new MenuModel(Utils.MenuName_Parah, true, true);
             headerList.add(menuModel);
             if (menuModel.hasChildren) {
                 Log.d(TAG, "prepareParahData: ");
@@ -235,7 +266,7 @@ public class NavigationDrawer
                 childList.put(menuModel, parahContents);
             }
 
-            menuModel = new MenuModel(Utils.MenuName_Soorah, true, true, 1);
+            menuModel = new MenuModel(Utils.MenuName_Soorah, true, true);
             headerList.add(menuModel);
             if (menuModel.hasChildren) {
                 Log.d(TAG, "prepareSoorahData: ");
@@ -247,15 +278,15 @@ public class NavigationDrawer
                 childList.put(menuModel, soorahContents);
             }
 
-            menuModel = new MenuModel(Utils.MenuName_Bookmarks, true, true, 0);
+            menuModel = new MenuModel(Utils.MenuName_Bookmarks, true, true);
             headerList.add(menuModel);
             // add bookmarks
             if (menuModel.hasChildren) {
-                // get shared preferences
-                getBookmarkedPages(this);
+                getBookmarkedPages(this); // get shared preferences data and store inside bookmarkContents list
+                Log.d(TAG, "prepareMenuData: bookmarkContents.size() = " + bookmarkContents.size());
+                childList.put(menuModel, bookmarkContents);
             }
-
-            menuModel = new MenuModel(Utils.MenuName_About, true, false, 0);
+            menuModel = new MenuModel(Utils.MenuName_About, true, false);
             headerList.add(menuModel);
         }
 
@@ -265,20 +296,20 @@ public class NavigationDrawer
 
         SharedPreferences preferences = context.getSharedPreferences(Utils.BOOKMARKS_PREFERENCES, MODE_PRIVATE);
 
-        Log.d(TAG, "getBookmarkedPages: preferences.getAll().size() = " + preferences.getAll().size());
+        Log.d(TAG, "getBookmarkedPages: size of preferences = " + preferences.getAll().size());
         Map<String, ?> allEntries = preferences.getAll();
+
+        // loop through all preferences and get all keys and values
         for (Map.Entry<String, ?> entry : allEntries.entrySet()) {
-            Log.d("map values", entry.getKey() + ": " + entry.getValue().toString());
+            String prefKey = entry.getKey();
+            int pageNo = preferences.getInt(prefKey, 0); // entry.getValue().toString() also correct
+            Log.d(TAG, "mapValues = " + prefKey + ": " + entry.getValue().toString());
+
+            Bookmark bookmark = new Bookmark(prefKey, pageNo);
+
+            //PdfDocument.Bookmark bookmarkPdf = (Bookmark) bookmark;
+            bookmarkContents.add(bookmark);
         }
-
-        boolean isBookmark = preferences.getBoolean("itemID", false);
-        int pageNo = preferences.getInt("pageNo", 0);
-        String bookmarkTitle = preferences.getString("bookmarkTitle", null);
-        //pdfView.jumpTo(pageNo, true);
-        Toast.makeText(context, bookmarkTitle, Toast.LENGTH_SHORT).show();
-
-        // the bookmarked icon
-
     }
 
     private void populateExpandableList() {
@@ -333,7 +364,7 @@ public class NavigationDrawer
 
                 if (childList.get(headerList.get(groupPosition)) != null) {
 
-                    PdfDocument.Bookmark bookmark = childList.get(headerList.get(groupPosition)).get(childPosition); // single bookmark
+                    Bookmark bookmark = childList.get(headerList.get(groupPosition)).get(childPosition); // single bookmark
                     String bookmarkName = bookmark.getTitle();
                     int pageNo = (int) bookmark.getPageIdx();
                     pdfView.jumpTo(pageNo);
@@ -361,7 +392,6 @@ public class NavigationDrawer
         }
 
     }
-
 
 
     private void showStatusBar() {

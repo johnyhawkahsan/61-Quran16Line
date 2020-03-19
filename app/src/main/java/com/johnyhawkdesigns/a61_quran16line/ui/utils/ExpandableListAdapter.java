@@ -19,11 +19,11 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 
     private Context context;
     private List<MenuModel> listDataHeader;
-    private HashMap<MenuModel, List<PdfDocument.Bookmark>> listDataChild;
+    private HashMap<MenuModel, List<Bookmark>> listDataChild;
 
     public ExpandableListAdapter(Context context,
                                  List<MenuModel> listDataHeader,
-                                 HashMap<MenuModel, List<PdfDocument.Bookmark>> listChildData) {
+                                 HashMap<MenuModel, List<Bookmark>> listChildData){
 
         this.context = context;
         this.listDataHeader = listDataHeader;
@@ -31,7 +31,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
     }
 
     @Override
-    public PdfDocument.Bookmark getChild(int groupPosition, int childPosition) {
+    public Bookmark getChild(int groupPosition, int childPosition) {
         return this.listDataChild.get(this.listDataHeader.get(groupPosition))
                 .get(childPosition);
     }
