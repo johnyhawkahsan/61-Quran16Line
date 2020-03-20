@@ -59,7 +59,7 @@ public class HomeFragment
         // Showing pdf file
         pdfView = view.findViewById(R.id.pdfViewQuran);
         pdfView.fromAsset(PDF_FILE)
-                .scrollHandle(new DefaultScrollHandle(getContext())) // This shows page number while scrolling
+                //.scrollHandle(new DefaultScrollHandle(getContext())) // This shows page number while scrolling
                 .onTap(this)
                 .onLoad(this)
                 .onPageChange(this)
@@ -91,6 +91,7 @@ public class HomeFragment
                         Log.d(TAG, "onEnterTitle: bookmarkTitle = " + bookmarkTitle);
                         // store this into bookmarks shared preferences
                         saveBookmark(bookmarkTitle, pdfView.getCurrentPage(), getActivity());
+                        Toast.makeText(getActivity(), bookmarkTitle + " Saved", Toast.LENGTH_SHORT).show();
                     }
                 });
 
@@ -143,7 +144,7 @@ public class HomeFragment
         homeFragmentListener.returnBookmarks(pdfView.getTableOfContents()); // pass tableOfContents to Activity
         homeFragmentListener.passPdfView(pdfView); // pass pdfView to Activity
 
-        // once pdfView is loaded, we want to retrieve previously saved page
+        // once pdfView is loaded, we want to jump to previously saved page
         getBookmarkedPages(Utils.LAST_PAGE_PREFERENCES, getActivity());
     }
 
@@ -160,23 +161,23 @@ public class HomeFragment
     }
 
     // for random bookmarks, I want to add bookmarkTitle as a "key" for integer page no
-    public void saveBookmark(String bookmarkTitle, int pageNo, Context context){
+    private void saveBookmark(String bookmarkTitle, int pageNo, Context context){
         SharedPreferences preferences = context.getSharedPreferences(Utils.BOOKMARKS_PREFERENCES, MODE_PRIVATE);
         SharedPreferences.Editor editor = preferences.edit();
 
-        if (preferences.contains(bookmarkTitle) && preferences.getInt(bookmarkTitle, 0) == pageNo){ // if this key exists
-            // save last visited page in preferences
+
+        if (preferences.contains(bookmarkTitle) && preferences.getInt(bookmarkTitle, 0) == pageNo){ // if this key or page no is already stored in preferences
             Log.d(TAG, "onPageChanged: already stored");
         } else {
             // save last visited page in preferences
             editor.putInt(bookmarkTitle, pageNo);
             editor.apply();
             Log.d(TAG, "saveBookmark: Bookmark Saved " + "bookmarkTitle = " + bookmarkTitle + "pageNo = " + pageNo);
-            Toast.makeText(context, "Bookmark Saved", Toast.LENGTH_SHORT).show();
         }
     }
 
-    public void getBookmarkedPages(String bookmarkKey, Context context){
+
+    private void getBookmarkedPages(String bookmarkKey, Context context){
 
         SharedPreferences preferences = context.getSharedPreferences(Utils.BOOKMARKS_PREFERENCES, MODE_PRIVATE);
         int pageNo = preferences.getInt(bookmarkKey, 0);
@@ -185,8 +186,7 @@ public class HomeFragment
             pdfView.jumpTo(pageNo, true);
         }
 
-        Log.d(TAG, "getBookmarkedPages: pageNo = " + pageNo);
-        Toast.makeText(context, bookmarkKey, Toast.LENGTH_SHORT).show();
+        Log.d(TAG, "getBookmarkedPages: getting last visited pageNo = " + pageNo);
     }
 
 

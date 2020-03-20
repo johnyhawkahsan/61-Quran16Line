@@ -6,4 +6,9 @@
         android:orderInCategory="100"
         android:title="@string/action_settings"
         app:showAsAction="never" />
+
+    <item
+        android:id="@+id/clear_bookmarks"
+        android:title="Clear Bookmarks"
+        app:showAsAction="never" />
 </menu>

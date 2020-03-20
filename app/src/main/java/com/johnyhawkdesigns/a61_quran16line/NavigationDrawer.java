@@ -1,19 +1,21 @@
 package com.johnyhawkdesigns.a61_quran16line;
 
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import com.github.barteksc.pdfviewer.PDFView;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
 
 import android.util.Log;
 import android.view.Gravity;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 
 import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AlertDialog;
 import androidx.core.view.GravityCompat;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
@@ -22,7 +24,6 @@ import androidx.navigation.ui.NavigationUI;
 
 
 import com.google.android.material.navigation.NavigationView;
-import com.johnyhawkdesigns.a61_quran16line.ui.dialog.GotoDialogFragment;
 import com.johnyhawkdesigns.a61_quran16line.ui.home.HomeFragment;
 import com.johnyhawkdesigns.a61_quran16line.ui.utils.Bookmark;
 import com.johnyhawkdesigns.a61_quran16line.ui.utils.ExpandableListAdapter;
@@ -36,7 +37,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import android.view.Menu;
-import android.widget.Button;
 import android.widget.ExpandableListView;
 import android.widget.Toast;
 
@@ -123,12 +123,6 @@ public class NavigationDrawer
         NavigationUI.setupWithNavController(navigationView, navController);
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.navigation_drawer, menu);
-        return true;
-    }
 
     // To ensure the Back button works properly, you also need to override the onSupportNavigateUp() method
     @Override
@@ -210,6 +204,7 @@ public class NavigationDrawer
                 if (bookmark.getTitle().equals("parah")){
                     Log.d(TAG, "printBookmarksTree: populateParahContents");
                     populateParahContents(bookmark.getChildren());
+                    //this.soorahContents = bookmark.getChildren(); // also correct
                 } else if (bookmark.getTitle().equals("soorah")) {
                     Log.d(TAG, "printBookmarksTree: populateSoorahContents");
                     populateSoorahContents(bookmark.getChildren());
@@ -238,7 +233,6 @@ public class NavigationDrawer
     // method to populate/extract Parah bookmarks from tableOfContents
     private void populateParahContents(List<Bookmark> list) {
         this.parahContents = list; // it is simpler than using for loop - just assign the list
-
     }
 
 
@@ -257,24 +251,14 @@ public class NavigationDrawer
             menuModel = new MenuModel(Utils.MenuName_Parah, true, true);
             headerList.add(menuModel);
             if (menuModel.hasChildren) {
-                Log.d(TAG, "prepareParahData: ");
-                if (parahContents.size() > 1){
-                    Log.d(TAG, "prepareParahData: size = " + parahContents.size());
-                } else {
-                    Log.d(TAG, "prepareParahData: less than 1");
-                }
+                Log.d(TAG, "prepareParahData: size = " + parahContents.size());
                 childList.put(menuModel, parahContents);
             }
 
             menuModel = new MenuModel(Utils.MenuName_Soorah, true, true);
             headerList.add(menuModel);
             if (menuModel.hasChildren) {
-                Log.d(TAG, "prepareSoorahData: ");
-                if (soorahContents.size() > 1){
-                    Log.d(TAG, "prepareSoorahData: size = " + soorahContents.size());
-                } else {
-                    Log.d(TAG, "prepareSoorahData: less than 1");
-                }
+                Log.d(TAG, "prepareSoorahData: size = " + soorahContents.size());
                 childList.put(menuModel, soorahContents);
             }
 
@@ -306,9 +290,7 @@ public class NavigationDrawer
             Log.d(TAG, "mapValues = " + prefKey + ": " + entry.getValue().toString());
 
             Bookmark bookmark = new Bookmark(prefKey, pageNo);
-
-            //PdfDocument.Bookmark bookmarkPdf = (Bookmark) bookmark;
-            bookmarkContents.add(bookmark);
+            bookmarkContents.add(bookmark); // add this bookmark to bookmarkContents list so we can populate Bookmarks in menu
         }
     }
 
@@ -374,9 +356,18 @@ public class NavigationDrawer
                     Toast.makeText(NavigationDrawer.this, "Parah = " + bookmarkName + ", pageNo = " + pageNo, Toast.LENGTH_SHORT).show();
 
                 }
+
+                // by clicking on "Bookmarks" children, we need to be able to delete bookmarks
+                if (headerList.get(groupPosition).menuName.equals(Utils.MenuName_Bookmarks)){
+                    Log.d(TAG, "onChildClick: Child is a part of ==BOOKMARKS Group=");
+                }
+
                 return false;
             }
         });
+
+
+
     }
 
 
@@ -425,7 +416,51 @@ public class NavigationDrawer
         this.pdfView = pdfView;
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_main, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+
+            case R.id.clear_bookmarks:
+                Log.d(TAG, "onOptionsItemSelected: delete all children profiles");
+
+                // Build alert dialog for confirmation
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle("Do you want to delete all bookmark data??");
+                builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Toast.makeText(NavigationDrawer.this, "Deleting All Bookmarks", Toast.LENGTH_SHORT).show();
+
+                        SharedPreferences preferences = getSharedPreferences(Utils.BOOKMARKS_PREFERENCES, MODE_PRIVATE);
+                        //preferences.edit().remove("key").commit(); // remove single item
+                        preferences.edit().clear().apply();
+                    }
+                });
+                builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                });
+                AlertDialog ad = builder.create();
+                ad.show();
+
+                return true;
+            case R.id.action_settings:
+                Log.d(TAG, "onOptionsItemSelected: open settings");
+
+                return true;
+
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
 
 
 }
