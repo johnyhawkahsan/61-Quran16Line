@@ -237,7 +237,6 @@ public class NavigationDrawer
     }
 
 
-
     private void prepareMenuData() {
 
         // I'm using this if statement because I was sometimes getting duplicate items in List, because when onLoadComplete is fired multiple times, we will get this method "prepareMenuData" multiple times.
@@ -418,6 +417,7 @@ public class NavigationDrawer
     public void passPdfView(PDFView pdfView) {
         this.pdfView = pdfView;
     }
+
 
     @Override
     public void bookmarkSaved(String title) {

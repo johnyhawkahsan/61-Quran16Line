@@ -163,6 +163,7 @@ public class HomeFragment
 
     // for random bookmarks, I want to add bookmarkTitle as a "key" for integer page no
     private void saveBookmark(String bookmarkTitle, int pageNo, Context context){
+
         SharedPreferences preferences = context.getSharedPreferences(Utils.BOOKMARKS_PREFERENCES, MODE_PRIVATE);
         SharedPreferences.Editor editor = preferences.edit();
 
