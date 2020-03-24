@@ -1,6 +1,7 @@
 package com.johnyhawkdesigns.a61_quran16line.ui.utils;
 
 import android.content.Context;
+import android.database.DataSetObserver;
 import android.graphics.Typeface;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -108,8 +109,17 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
         return false;
     }
 
+
     @Override
     public boolean isChildSelectable(int groupPosition, int childPosition) {
         return true;
     }
+
+
+    @Override
+    public void notifyDataSetChanged() {
+        super.notifyDataSetChanged();
+    }
+
+
 }

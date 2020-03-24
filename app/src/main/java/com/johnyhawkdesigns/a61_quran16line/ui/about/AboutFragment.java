@@ -22,7 +22,6 @@ public class AboutFragment extends Fragment {
         aboutTextView.setText("Developed by Ahsan");
 
 
-
         return view;
     }
 }

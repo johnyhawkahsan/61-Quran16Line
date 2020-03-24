@@ -91,6 +91,7 @@ public class HomeFragment
                         Log.d(TAG, "onEnterTitle: bookmarkTitle = " + bookmarkTitle);
                         // store this into bookmarks shared preferences
                         saveBookmark(bookmarkTitle, pdfView.getCurrentPage(), getActivity());
+                        homeFragmentListener.bookmarkSaved(bookmarkTitle); // notify Main activity about saved bookmark so list may be updated
                         Toast.makeText(getActivity(), bookmarkTitle + " Saved", Toast.LENGTH_SHORT).show();
                     }
                 });
@@ -165,7 +166,6 @@ public class HomeFragment
         SharedPreferences preferences = context.getSharedPreferences(Utils.BOOKMARKS_PREFERENCES, MODE_PRIVATE);
         SharedPreferences.Editor editor = preferences.edit();
 
-
         if (preferences.contains(bookmarkTitle) && preferences.getInt(bookmarkTitle, 0) == pageNo){ // if this key or page no is already stored in preferences
             Log.d(TAG, "onPageChanged: already stored");
         } else {
@@ -202,7 +202,6 @@ public class HomeFragment
 
     }
 
-
     @Override
     public void onDetach() {
         super.onDetach();
@@ -231,7 +230,7 @@ public class HomeFragment
         public void returnBookmarks (List<PdfDocument.Bookmark> tableOfContents);
         public void fullscreen(Boolean isFullscreen);
         public void passPdfView(PDFView pdfView);
-        //public void pageChanged(int pageNo, int pageCount); // not using now because I moved goto button in fragment
+        public void bookmarkSaved(String title);
     }
 
 }

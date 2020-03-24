@@ -75,6 +75,7 @@ public class NavigationDrawer
     PDFView pdfView;
 
 
+    MenuModel bookmarkMenuModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -262,14 +263,15 @@ public class NavigationDrawer
                 childList.put(menuModel, soorahContents);
             }
 
-            menuModel = new MenuModel(Utils.MenuName_Bookmarks, true, true);
-            headerList.add(menuModel);
+            bookmarkMenuModel = new MenuModel(Utils.MenuName_Bookmarks, true, true);
+            headerList.add(bookmarkMenuModel);
             // add bookmarks
-            if (menuModel.hasChildren) {
+            if (bookmarkMenuModel.hasChildren) {
                 getBookmarkedPages(this); // get shared preferences data and store inside bookmarkContents list
                 Log.d(TAG, "prepareMenuData: bookmarkContents.size() = " + bookmarkContents.size());
-                childList.put(menuModel, bookmarkContents);
+                childList.put(bookmarkMenuModel, bookmarkContents);
             }
+
             menuModel = new MenuModel(Utils.MenuName_About, true, false);
             headerList.add(menuModel);
         }
@@ -362,7 +364,8 @@ public class NavigationDrawer
                     Log.d(TAG, "onChildClick: Child is a part of ==BOOKMARKS Group=");
                 }
 
-                return false;
+
+                return true;
             }
         });
 
@@ -417,6 +420,21 @@ public class NavigationDrawer
     }
 
     @Override
+    public void bookmarkSaved(String title) {
+        Log.d(TAG, "bookmarkSaved: title = " + title);
+
+        refreshBookmarkList();
+    }
+
+    // 1st clear bookmark content, then retrieve bookmarks again to fill the list = NOTE: Once list is updated, then we will be able to call notifyDataSetChanged()
+    public void refreshBookmarkList(){
+        bookmarkContents.clear();
+        getBookmarkedPages(this); // get updated bookmarks list and update List<Bookmark> bookmarkContents
+        expandableListAdapter.notifyDataSetChanged();
+        Log.d(TAG, "prepareMenuData: bookmarkContents.size() = " + bookmarkContents.size());
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_main, menu);
@@ -441,6 +459,7 @@ public class NavigationDrawer
                         SharedPreferences preferences = getSharedPreferences(Utils.BOOKMARKS_PREFERENCES, MODE_PRIVATE);
                         //preferences.edit().remove("key").commit(); // remove single item
                         preferences.edit().clear().apply();
+                        refreshBookmarkList(); // to clear all items in list
                     }
                 });
                 builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
