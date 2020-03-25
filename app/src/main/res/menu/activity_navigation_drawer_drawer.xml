@@ -8,34 +8,6 @@
             android:id="@+id/nav_home"
             android:icon="@drawable/ic_menu_camera"
             android:title="@string/menu_quran" />
-        <item
-            android:id="@+id/nav_gallery"
-            android:icon="@drawable/ic_menu_gallery"
-            android:title="@string/menu_index" />
-        <item
-            android:id="@+id/nav_slideshow"
-            android:icon="@drawable/ic_menu_slideshow"
-            android:title="@string/menu_bookmarks" >
-
-            <menu>
-                <group android:checkableBehavior="single">
-
-                    <item
-                        android:id="@+id/challengeZone"
-                        android:checked="false"
-                        android:icon="@drawable/ic_menu_share"
-                        android:title="Home Work" />
-
-                    <item
-                        android:id="@+id/interviewSchedule"
-                        android:checked="false"
-                        android:icon="@drawable/ic_menu_send"
-                        android:title="Interview Schedule" />
-
-                </group>>
-
-            </menu>
-        </item>
 
     </group>
 

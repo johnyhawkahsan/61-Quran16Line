@@ -65,7 +65,7 @@ public class NavigationDrawer
     List<Bookmark> bookmarkContents;
 
 
-    // TODO: Related to ExpandableListView
+    // Related to ExpandableListView
     ExpandableListAdapter expandableListAdapter;
     ExpandableListView expandableListView;
     List<MenuModel> headerList = new ArrayList<>(); // Holds headers of the Navigation Drawers
@@ -74,8 +74,7 @@ public class NavigationDrawer
     // I'm returning this pdfView from HomeFragment using interface method
     PDFView pdfView;
 
-
-    MenuModel bookmarkMenuModel;
+    MenuModel bookmarkMenuModel; // this single menu model for bookmarks is used to update when bookmark is saved
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,13 +89,13 @@ public class NavigationDrawer
         drawer = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
         mAppBarConfiguration = new AppBarConfiguration.Builder( // Passing each menu ID as a set of Ids because each menu should be considered as top level destinations.
-                R.id.nav_home, R.id.nav_gallery, R.id.nav_slideshow)
+                R.id.nav_home)
                 .setDrawerLayout(drawer)
                 .build();
 
         setupNavController(navigationView);
 
-        // TODO: Related to ExpandableListView
+        // Related to ExpandableListView
         expandableListView = findViewById(R.id.expandableListView);
         navigationView.setNavigationItemSelectedListener(this);
 
@@ -143,10 +142,6 @@ public class NavigationDrawer
         Log.d(TAG, "onNavigationItemSelected: id = " + id);
 
         if (id == R.id.nav_home) {
-
-        } else if (id == R.id.nav_gallery) {
-
-        } else if (id == R.id.nav_slideshow) {
 
         }
 
@@ -329,7 +324,7 @@ public class NavigationDrawer
 
                         case Utils.MenuName_About: // About
                             // if we are currently on some other fragment, we need to launch navigate method, otherwise, we only need to close drawer
-                            navController.navigate(R.id.nav_about); // navigate to this fragment
+                            navController.navigate(R.id.nav_about);// navigate to this fragment
                             drawer.closeDrawer(Gravity.LEFT);
                             break;
 
@@ -354,8 +349,7 @@ public class NavigationDrawer
                     drawer.closeDrawer(Gravity.LEFT);
 
                     Log.d(TAG, "onChildClick: bookmarkName = " + bookmarkName + ", pageNo = " + pageNo);
-                    Toast.makeText(NavigationDrawer.this, "Parah = " + bookmarkName + ", pageNo = " + pageNo, Toast.LENGTH_SHORT).show();
-
+                    //Toast.makeText(NavigationDrawer.this, "Parah = " + bookmarkName + ", pageNo = " + pageNo, Toast.LENGTH_SHORT).show();
                 }
 
                 // by clicking on "Bookmarks" children, we need to be able to delete bookmarks
@@ -458,7 +452,7 @@ public class NavigationDrawer
 
                         SharedPreferences preferences = getSharedPreferences(Utils.BOOKMARKS_PREFERENCES, MODE_PRIVATE);
                         //preferences.edit().remove("key").commit(); // remove single item
-                        preferences.edit().clear().apply();
+                        preferences.edit().clear().apply(); // clear all keys
                         refreshBookmarkList(); // to clear all items in list
                     }
                 });
@@ -469,10 +463,6 @@ public class NavigationDrawer
                 });
                 AlertDialog ad = builder.create();
                 ad.show();
-
-                return true;
-            case R.id.action_settings:
-                Log.d(TAG, "onOptionsItemSelected: open settings");
 
                 return true;
 
