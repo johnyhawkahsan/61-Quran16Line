@@ -1,11 +1,11 @@
 <resources>
-    <string name="app_name">Al-Quran 16Lines</string>
-    <string name="title_app">Quran 16Line</string>
+    <string name="app_name">Quran 16Line Tajweedi</string>
+    <string name="title_app">Quran 16Line Tajweedi</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
-    <string name="nav_header_title">Al-Quran</string>
-    <string name="nav_header_subtitle">Tajweedi Quran 16 lines</string>
-    <string name="nav_header_desc">Al-Quran 16 lines</string>
+    <string name="nav_header_title">Quran 16 Line</string>
+    <string name="nav_header_subtitle">Tajweedi Quran 16 Line</string>
+    <string name="nav_header_desc">Quran 16 Line</string>
     <string name="action_settings">Settings</string>
 
     <string name="menu_quran">Quran</string>
