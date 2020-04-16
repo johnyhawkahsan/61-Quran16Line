@@ -115,8 +115,6 @@ public class NavigationDrawer
 
 
 
-
-
     private void setupNavController(NavigationView navigationView) {
         navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
