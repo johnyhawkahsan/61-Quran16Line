@@ -37,6 +37,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import android.view.Menu;
+import android.view.WindowManager;
 import android.widget.ExpandableListView;
 import android.widget.Toast;
 
@@ -85,6 +86,7 @@ public class NavigationDrawer
         setSupportActionBar(toolbar);
 
         decorView = getWindow().getDecorView(); // this view can be used to show or hide status bar
+        showStatusBar2(); // we want the app to start in full screen
 
         drawer = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
@@ -370,17 +372,30 @@ public class NavigationDrawer
         Log.d(TAG, "fullscreen: isFullscreen = " + isFullscreen);
         if (isFullscreen){
             showStatusBar();
+            showStatusBar2(); // This method is actually working and showing toolbar
             showToolbar();
+
         }else {
             hideStatusBar();
+            hideStatusBar2();
             hideToolBar();
         }
 
     }
 
+    // I'm trying/practicing to actually show status bar - showStatusBar method did not work for me
+    private void showStatusBar2() {
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN); // clear full screen
+        Log.d(TAG, "showStatusBar2: show");
+    }
+
+    private void hideStatusBar2() {
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN); // use full screen
+        Log.d(TAG, "hideStatusBar2: hide");
+    }
 
     private void showStatusBar() {
-        int uiOptions = View.SYSTEM_UI_FLAG_VISIBLE; // Hide the status bar.
+        int uiOptions = View.SYSTEM_UI_FLAG_VISIBLE; // Show the status bar.
         decorView.setSystemUiVisibility(uiOptions);
     }
 
@@ -389,7 +404,6 @@ public class NavigationDrawer
     private void hideStatusBar() {
         int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN; // Hide the status bar.
         decorView.setSystemUiVisibility(uiOptions);
-
     }
 
     public void hideToolBar() {
